@@ -6,6 +6,8 @@
 
 ## 📸 Preview
 
+https://xian0000000.github.io/3d_museum/ <-- preview web
+
 ### Denah Lantai (Floor Plan)
 
 ![Floor Plan](./screenshots/floorplan.svg)
@@ -267,12 +269,11 @@ Jika tidak ada, sistem akan otomatis menggunakan tekstur canvas prosedural sebag
 
 ## 📝 Lisensi
 
-MIT — bebas digunakan, dimodifikasi, dan didistribusikan.
+© xina 2026
 
 ---
 
 <p align="center">
   Dibuat dengan ❤️ menggunakan Three.js &nbsp;·&nbsp;
-  <a href="https://xian0000000.github.io/statistic/">StatLab</a> &nbsp;·&nbsp;
   <a href="https://github.com/xian0000000">@xian0000000</a>
 </p>
