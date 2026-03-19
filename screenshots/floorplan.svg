@@ -1,0 +1,185 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" width="800" height="520">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d0a06"/>
+      <stop offset="100%" style="stop-color:#1a1208"/>
+    </linearGradient>
+    <linearGradient id="wallN" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2a1e0e"/>
+      <stop offset="50%" style="stop-color:#3a2a12"/>
+      <stop offset="100%" style="stop-color:#2a1e0e"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softglow">
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="520" fill="url(#bg)"/>
+
+  <!-- Title bar -->
+  <rect x="0" y="0" width="800" height="52" fill="#0a0806" opacity="0.9"/>
+  <text x="30" y="20" fill="#5a4a2a" font-family="Georgia,serif" font-size="9" letter-spacing="4">MUSEUM 3D — DENAH LANTAI</text>
+  <text x="30" y="38" fill="#c8a050" font-family="Georgia,serif" font-size="18" letter-spacing="6" font-weight="normal">FLOOR PLAN</text>
+  <text x="680" y="32" fill="#3a2e18" font-family="monospace" font-size="9" letter-spacing="2">v1.0</text>
+  <line x1="0" y1="52" x2="800" y2="52" stroke="#c8a050" stroke-width="0.5" opacity="0.4"/>
+
+  <!-- Room outline -->
+  <rect x="180" y="72" width="440" height="400" fill="#14100a" stroke="#3a2a12" stroke-width="2"/>
+
+  <!-- Floor pattern (subtle grid) -->
+  <g opacity="0.15" stroke="#6a5030" stroke-width="0.5">
+    <line x1="180" y1="122" x2="620" y2="122"/> <line x1="180" y1="172" x2="620" y2="172"/>
+    <line x1="180" y1="222" x2="620" y2="222"/> <line x1="180" y1="272" x2="620" y2="272"/>
+    <line x1="180" y1="322" x2="620" y2="322"/> <line x1="180" y1="372" x2="620" y2="372"/>
+    <line x1="180" y1="422" x2="620" y2="422"/>
+    <line x1="230" y1="72" x2="230" y2="472"/> <line x1="280" y1="72" x2="280" y2="472"/>
+    <line x1="330" y1="72" x2="330" y2="472"/> <line x1="380" y1="72" x2="380" y2="472"/>
+    <line x1="430" y1="72" x2="430" y2="472"/> <line x1="480" y1="72" x2="480" y2="472"/>
+    <line x1="530" y1="72" x2="530" y2="472"/> <line x1="580" y1="72" x2="580" y2="472"/>
+  </g>
+
+  <!-- Walls (thicker edges) -->
+  <!-- North wall -->
+  <rect x="178" y="70" width="444" height="12" fill="#2a1e0e"/>
+  <!-- South wall -->
+  <rect x="178" y="460" width="444" height="12" fill="#2a1e0e"/>
+  <!-- West wall -->
+  <rect x="178" y="70" width="12" height="402" fill="#2a1e0e"/>
+  <!-- East wall -->
+  <rect x="610" y="70" width="12" height="402" fill="#2a1e0e"/>
+
+  <!-- Pillars -->
+  <g fill="#3a2a10">
+    <rect x="244" y="130" width="10" height="10"/> <rect x="346" y="130" width="10" height="10"/> <rect x="448" y="130" width="10" height="10"/>
+    <rect x="550" y="130" width="10" height="10"/> <rect x="244" y="230" width="10" height="10"/> <rect x="346" y="230" width="10" height="10"/>
+    <rect x="448" y="230" width="10" height="10"/> <rect x="550" y="230" width="10" height="10"/> <rect x="244" y="330" width="10" height="10"/>
+    <rect x="346" y="330" width="10" height="10"/> <rect x="448" y="330" width="10" height="10"/> <rect x="550" y="330" width="10" height="10"/>
+  </g>
+  <!-- Pillar gold caps -->
+  <g fill="#c8a050" opacity="0.6">
+    <rect x="242" y="128" width="14" height="2"/> <rect x="344" y="128" width="14" height="2"/> <rect x="446" y="128" width="14" height="2"/>
+    <rect x="548" y="128" width="14" height="2"/> <rect x="242" y="228" width="14" height="2"/> <rect x="344" y="228" width="14" height="2"/>
+    <rect x="446" y="228" width="14" height="2"/> <rect x="548" y="228" width="14" height="2"/> <rect x="242" y="328" width="14" height="2"/>
+    <rect x="344" y="328" width="14" height="2"/> <rect x="446" y="328" width="14" height="2"/> <rect x="548" y="328" width="14" height="2"/>
+  </g>
+
+  <!-- ── NORTH WALL PAINTINGS ── -->
+  <g filter="url(#glow)">
+    <!-- Harmoni Cahaya -->
+    <rect x="220" y="72" width="60" height="8" fill="#e87820" opacity="0.8"/>
+    <text x="250" y="69" fill="#9a8060" font-family="Georgia,serif" font-size="7" text-anchor="middle">Harmoni Cahaya</text>
+    <!-- Kota Imajiner -->
+    <rect x="370" y="72" width="60" height="8" fill="#c040a0" opacity="0.8"/>
+    <text x="400" y="69" fill="#9a8060" font-family="Georgia,serif" font-size="7" text-anchor="middle">Kota Imajiner</text>
+    <!-- Hutan Mimpi -->
+    <rect x="520" y="72" width="60" height="8" fill="#40a050" opacity="0.8"/>
+    <text x="550" y="69" fill="#9a8060" font-family="Georgia,serif" font-size="7" text-anchor="middle">Hutan Mimpi</text>
+  </g>
+
+  <!-- ── EAST WALL PAINTINGS ── -->
+  <g filter="url(#glow)">
+    <!-- Lautan Waktu -->
+    <rect x="610" y="148" width="8" height="50" fill="#1060a0" opacity="0.9"/>
+    <text x="630" y="173" fill="#9a8060" font-family="Georgia,serif" font-size="7" text-anchor="start">Lautan Waktu</text>
+    <!-- Api Jiwa -->
+    <rect x="610" y="248" width="8" height="50" fill="#e05010" opacity="0.9"/>
+    <text x="630" y="273" fill="#9a8060" font-family="Georgia,serif" font-size="7" text-anchor="start">Api Jiwa</text>
+  </g>
+
+  <!-- ── WEST WALL PAINTINGS ── -->
+  <g filter="url(#glow)">
+    <!-- Batas Langit -->
+    <rect x="182" y="148" width="8" height="50" fill="#6040c0" opacity="0.9"/>
+    <text x="162" y="173" fill="#9a8060" font-family="Georgia,serif" font-size="7" text-anchor="end">Batas Langit</text>
+    <!-- StatLab ★ NEW -->
+    <rect x="182" y="248" width="8" height="50" fill="#00e5c8" opacity="0.9" filter="url(#softglow)"/>
+    <text x="162" y="267" fill="#00e5c8" font-family="monospace" font-size="7" text-anchor="end" font-weight="bold">★ StatLab</text>
+    <text x="162" y="278" fill="#5a8a80" font-family="monospace" font-size="6" text-anchor="end">NEW</text>
+  </g>
+
+  <!-- ── SOUTH WALL PAINTINGS ── -->
+  <g filter="url(#glow)">
+    <!-- Chat Ocean -->
+    <rect x="268" y="460" width="60" height="8" fill="#007bff" opacity="0.9"/>
+    <text x="298" y="482" fill="#9a8060" font-family="Georgia,serif" font-size="7" text-anchor="middle">Chat Ocean</text>
+    <!-- Perpustakaan -->
+    <rect x="468" y="460" width="60" height="8" fill="#2d6abf" opacity="0.9"/>
+    <text x="498" y="482" fill="#9a8060" font-family="Georgia,serif" font-size="7" text-anchor="middle">Perpustakaan</text>
+  </g>
+
+  <!-- ── SCULPTURES (center) ── -->
+  <g>
+    <!-- Lingkaran Abadi -->
+    <circle cx="310" cy="270" r="14" fill="none" stroke="#d4a020" stroke-width="2" opacity="0.8"/>
+    <circle cx="310" cy="270" r="6" fill="#d4a020" opacity="0.4"/>
+    <text x="310" y="296" fill="#8a7050" font-family="Georgia,serif" font-size="7" text-anchor="middle">Lingkaran Abadi</text>
+    <!-- Bola Biru Bumi -->
+    <circle cx="400" cy="270" r="14" fill="#2060c0" opacity="0.5"/>
+    <circle cx="400" cy="270" r="14" fill="none" stroke="#2060c0" stroke-width="1.5" opacity="0.8"/>
+    <text x="400" y="296" fill="#8a7050" font-family="Georgia,serif" font-size="7" text-anchor="middle">Bola Biru Bumi</text>
+    <!-- Puncak Merah -->
+    <polygon points="490,256 476,286 504,286" fill="#c02828" opacity="0.5"/>
+    <polygon points="490,256 476,286 504,286" fill="none" stroke="#c02828" stroke-width="1.5" opacity="0.8"/>
+    <text x="490" y="300" fill="#8a7050" font-family="Georgia,serif" font-size="7" text-anchor="middle">Puncak Merah</text>
+  </g>
+
+  <!-- Spotlight indicators -->
+  <g opacity="0.2" fill="#fff4d8">
+    <circle cx="310" cy="76" r="4"/> <circle cx="400" cy="76" r="4"/> <circle cx="490" cy="76" r="4"/>
+    <circle cx="310" cy="466" r="4"/> <circle cx="490" cy="466" r="4"/>
+    <circle cx="616" cy="175" r="4"/> <circle cx="616" cy="274" r="4"/>
+    <circle cx="184" cy="175" r="4"/> <circle cx="184" cy="274" r="4"/>
+  </g>
+
+  <!-- Camera start position -->
+  <g transform="translate(400,380)">
+    <circle cx="0" cy="0" r="8" fill="#c8a050" opacity="0.3"/>
+    <circle cx="0" cy="0" r="4" fill="#c8a050" opacity="0.7"/>
+    <!-- View cone -->
+    <path d="M0,0 L-18,-30 L18,-30 Z" fill="#c8a050" opacity="0.15"/>
+    <text x="0" y="22" fill="#c8a050" font-family="monospace" font-size="7" text-anchor="middle" opacity="0.7">START</text>
+  </g>
+
+  <!-- Compass rose (kanan atas) -->
+  <g transform="translate(740,90)" opacity="0.6">
+    <text x="0" y="-14" fill="#6a5a3a" font-family="Georgia,serif" font-size="8" text-anchor="middle">U</text>
+    <text x="0" y="22"  fill="#6a5a3a" font-family="Georgia,serif" font-size="8" text-anchor="middle">S</text>
+    <text x="-16" y="5" fill="#6a5a3a" font-family="Georgia,serif" font-size="8" text-anchor="middle">B</text>
+    <text x="16"  y="5" fill="#6a5a3a" font-family="Georgia,serif" font-size="8" text-anchor="middle">T</text>
+    <line x1="0" y1="-10" x2="0" y2="10" stroke="#6a5a3a" stroke-width="0.8"/>
+    <line x1="-10" y1="0" x2="10" y2="0" stroke="#6a5a3a" stroke-width="0.8"/>
+  </g>
+
+  <!-- Legend -->
+  <g transform="translate(30,280)">
+    <text x="0" y="-10" fill="#5a4a2a" font-family="Georgia,serif" font-size="8" letter-spacing="3">LEGENDA</text>
+    <line x1="0" y1="-6" x2="50" y2="-6" stroke="#3a2e18" stroke-width="0.5"/>
+
+    <rect x="0" y="0" width="12" height="8" fill="#c8a050" opacity="0.7"/>
+    <text x="16" y="8" fill="#6a5a3a" font-family="Georgia,serif" font-size="8">Lukisan Seni</text>
+
+    <rect x="0" y="16" width="12" height="8" fill="#00e5c8" opacity="0.8"/>
+    <text x="16" y="24" fill="#00e5c8" font-family="monospace" font-size="8">★ StatLab (Baru)</text>
+
+    <rect x="0" y="32" width="12" height="8" fill="#007bff" opacity="0.8"/>
+    <text x="16" y="40" fill="#6a5a3a" font-family="Georgia,serif" font-size="8">Proyek Digital</text>
+
+    <circle cx="6" cy="56" r="6" fill="#d4a020" opacity="0.6"/>
+    <text x="16" y="60" fill="#6a5a3a" font-family="Georgia,serif" font-size="8">Patung</text>
+
+    <circle cx="6" cy="76" r="5" fill="#c8a050" opacity="0.5"/>
+    <text x="16" y="80" fill="#c8a050" font-family="Georgia,serif" font-size="8">Posisi Awal Kamera</text>
+  </g>
+
+  <!-- Bottom bar -->
+  <line x1="0" y1="500" x2="800" y2="500" stroke="#c8a050" stroke-width="0.5" opacity="0.3"/>
+  <rect x="0" y="500" width="800" height="20" fill="#0a0806" opacity="0.8"/>
+  <text x="30" y="513" fill="#3a2e18" font-family="monospace" font-size="7" letter-spacing="2">MUSEUM 3D — THREE.JS r128 — GITHUB PAGES</text>
+  <text x="770" y="513" fill="#3a2e18" font-family="monospace" font-size="7" text-anchor="end">xian0000000</text>
+</svg>
