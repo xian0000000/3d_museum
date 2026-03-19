@@ -1,567 +1,1428 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Museum 3D</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{overflow:hidden;background:#080604;font-family:Georgia,'Times New Roman',serif;color:#9a8060;user-select:none}
-canvas{display:block;cursor:grab}
-canvas.dragging{cursor:grabbing}
-
-#loading{position:fixed;inset:0;background:#080604;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;transition:opacity .8s ease}
-#loading h1{color:#c8a050;font-size:2.6rem;letter-spacing:.45em;text-transform:uppercase;font-weight:normal;margin-bottom:.3rem}
-.l-sub{color:#5a4a2a;font-size:.65rem;letter-spacing:.38em;text-transform:uppercase;margin-bottom:2.5rem}
-.l-bar{width:180px;height:1px;background:#2a1e0e}
-.l-fill{height:100%;background:#c8a050;width:0%;transition:width .18s ease}
-.l-lbl{margin-top:.9rem;color:#3a2e18;font-size:.6rem;letter-spacing:.22em;text-transform:uppercase}
-
-#hint{
-  position:fixed;inset:0;
-  background:radial-gradient(ellipse at center,rgba(8,6,4,.5)0%,rgba(8,6,4,.88)100%);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  z-index:100;transition:opacity .4s;
-}
-#hint.off{opacity:0;pointer-events:none}
-.h-title{color:#c8a050;font-size:1.5rem;letter-spacing:.38em;text-transform:uppercase;font-weight:normal;margin-bottom:.5rem}
-.h-sub{color:#6a5a3a;font-size:.68rem;letter-spacing:.18em;margin-bottom:1.6rem}
-.divider{width:50px;height:1px;background:#3a2e18;margin:0 auto 1.5rem}
-.h-ctrl{color:#4a3e28;font-size:.62rem;letter-spacing:.12em;line-height:2.3;text-transform:uppercase;text-align:center}
-.h-ctrl span{color:#8a7050}
-.h-btn{
-  margin-top:1.8rem;
-  background:transparent;border:1px solid #c8a050;color:#c8a050;
-  font-family:Georgia,serif;font-size:.68rem;letter-spacing:.28em;text-transform:uppercase;
-  padding:.6rem 2rem;cursor:pointer;transition:background .2s,color .2s;
-}
-.h-btn:hover{background:#c8a050;color:#080604}
-
-#xhair{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:10;opacity:.6}
-
-#panel{
-  position:fixed;bottom:5vh;left:50%;
-  transform:translateX(-50%) translateY(8px);
-  background:rgba(8,6,4,.93);border:1px solid #2a2010;border-top:1px solid #c8a050;
-  padding:1rem 2.2rem 1.2rem;min-width:320px;max-width:460px;text-align:center;
-  z-index:50;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s
-}
-#panel.on{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
-#p-title{color:#c8a050;font-size:.92rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:.4rem}
-#p-desc{color:#9a8060;font-size:.73rem;line-height:1.7}
-#p-meta{color:#3a2e18;font-size:.6rem;letter-spacing:.16em;margin-top:.6rem}
-.p-tag{display:inline-block;border:1px solid #3a2e18;color:#5a4a28;font-size:.56rem;letter-spacing:.14em;padding:.1rem .5rem;margin-top:.45rem;text-transform:uppercase}
-
-#rlabel{position:fixed;top:20px;left:24px;z-index:10}
-.rl-h{display:block;color:#3a2e18;font-size:.55rem;letter-spacing:.32em;text-transform:uppercase}
-.rl-n{display:block;color:#8a7050;font-size:.7rem;letter-spacing:.22em;margin-top:.12rem;text-transform:uppercase}
-
-#hud{position:fixed;bottom:20px;right:24px;color:#2a2010;font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;line-height:2.1;text-align:right;z-index:10}
-#hud span{color:#4a3e28}
-
-/* on-screen joystick buttons for mobile / no-keyboard */
-#btns{position:fixed;bottom:24px;left:24px;z-index:10;display:grid;grid-template-columns:repeat(3,40px);grid-template-rows:repeat(2,40px);gap:4px}
-.btn{background:rgba(8,6,4,.7);border:1px solid #3a2e18;color:#6a5a3a;font-size:1rem;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:4px;touch-action:none;-webkit-tap-highlight-color:transparent}
-.btn:active{background:rgba(200,160,80,.15);border-color:#c8a050;color:#c8a050}
-</style>
-</head>
-<body>
-
-<!-- Loading -->
-<div id="loading">
-  <h1>Museum</h1>
-  <p class="l-sub">Galeri Seni Digital</p>
-  <div class="l-bar"><div class="l-fill" id="l-fill"></div></div>
-  <p class="l-lbl" id="l-lbl">Memuat galeri…</p>
-</div>
-
-<!-- Welcome / controls hint -->
-<div id="hint">
-  <p class="h-title">Selamat Datang</p>
-  <p class="h-sub">Museum Seni Digital</p>
-  <div class="divider"></div>
-  <div class="h-ctrl">
-    <span>W A S D</span> atau <span>Arrow</span> — Bergerak<br>
-    <span>Drag Mouse</span> — Pandangan<br>
-    <span>Tombol ↑↓←→</span> — Gerak di layar
-  </div>
-  <button class="h-btn" id="enter-btn">Masuk Museum</button>
-</div>
-
-<!-- Crosshair -->
-<svg id="xhair" width="20" height="20" viewBox="0 0 20 20">
-  <line x1="10" y1="2"  x2="10" y2="7"  stroke="#c8a050" stroke-width="1"/>
-  <line x1="10" y1="13" x2="10" y2="18" stroke="#c8a050" stroke-width="1"/>
-  <line x1="2"  y1="10" x2="7"  y2="10" stroke="#c8a050" stroke-width="1"/>
-  <line x1="13" y1="10" x2="18" y2="10" stroke="#c8a050" stroke-width="1"/>
-  <circle cx="10" cy="10" r="1.2" fill="#c8a050" opacity=".6"/>
-</svg>
-
-<!-- Info panel -->
-<div id="panel">
-  <p id="p-title"></p>
-  <p id="p-desc"></p>
-  <p id="p-meta"></p>
-  <span class="p-tag" id="p-tag">Koleksi Tetap</span>
-  <div id="p-link-wrap" style="display:none;margin-top:.8rem">
-    <a id="p-link" href="#" target="_blank" rel="noopener"
-      style="display:inline-block;background:transparent;border:1px solid #c8a050;color:#c8a050;
-             font-family:Georgia,serif;font-size:.68rem;letter-spacing:.28em;text-transform:uppercase;
-             padding:.5rem 1.6rem;text-decoration:none;transition:background .2s,color .2s;cursor:pointer">
-      Kunjungi Perpustakaan &#8594;
-    </a>
-  </div>
-</div>
-
-<!-- Room label -->
-<div id="rlabel">
-  <span class="rl-h">Lokasi</span>
-  <span class="rl-n" id="rl-name">Lobby Utama</span>
-</div>
-
-<!-- HUD -->
-<div id="hud">
-  <span>Drag</span> pandangan<br>
-  <span>WASD</span> bergerak
-</div>
-
-<!-- On-screen move buttons (row1: blank, fwd, blank / row2: left, back, right) -->
-<div id="btns">
-  <div></div>
-  <div class="btn" id="b-f">↑</div>
-  <div></div>
-  <div class="btn" id="b-l">←</div>
-  <div class="btn" id="b-b">↓</div>
-  <div class="btn" id="b-r">→</div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>
-'use strict';
-
-// ═══════════════════════════════════════════════════════════
-//  DATA
-// ═══════════════════════════════════════════════════════════
-const EXHIBITS = [
-  {type:'painting', title:'Harmoni Cahaya',  artist:'Rina Dewanto',  year:'2021', desc:'Ekspresi abstrak tentang perjalanan waktu melalui gelombang warna yang saling berpadu.',    colors:['#0e2a4a','#1a6090','#e87820','#f0a030']},
-  {type:'painting', title:'Kota Imajiner',   artist:'Bima Santoso',  year:'2019', desc:'Karya geometris menggambarkan kompleksitas kehidupan urban — kaca, baja, dan cahaya neon.',  colors:['#120820','#602080','#c040a0','#40c0e0']},
-  {type:'painting', title:'Hutan Mimpi',     artist:'Laras Utami',   year:'2020', desc:'Interpretasi organis dari alam liar melalui sapuan warna hijau yang bebas dan energik.',     colors:['#081a10','#1a5830','#40a050','#90d840']},
-  {type:'painting', title:'Lautan Waktu',    artist:'Farhan Rizki',  year:'2018', desc:'Meditasi visual tentang kedalaman samudra sebagai metafora perjalanan jiwa.',               colors:['#040c1c','#082050','#1060a0','#30b0e0']},
-  {type:'painting', title:'Api Jiwa',        artist:'Rina Dewanto',  year:'2022', desc:'Energi kehidupan yang berpijar — palet warna panas meledak dalam satu momen abadi.',         colors:['#2a0800','#a01808','#e05010','#f0a020']},
-  {type:'painting', title:'Batas Langit',    artist:'Yusuf Hakim',   year:'2023', desc:'Panorama abstrak tentang horizon dan kemungkinan tak terbatas yang menanti di baliknya.',    colors:['#080015','#301880','#6040c0','#c0a0ff']},
-  {type:'painting', title:'Akar Bumi',       artist:'Sri Wulandari', year:'2017', desc:'Eksplorasi hubungan organis antara tanah, akar, dan kehidupan — warisan leluhur.',           colors:['#120800','#4a2008','#905020','#c88030']},
-  {type:'painting', title:'Cermin Biru',     artist:'Bima Santoso',  year:'2022', desc:'Refleksi identitas modern dalam lautan digital yang terus bergerak dan berubah.',            colors:['#041020','#082860','#104890','#2090d0']},
-  {type:'painting', title:'Perpustakaan Kuno', artist:'Xina', year:'2026', desc:'Jelajahi koleksi buku, artikel, dan referensi digital kami yang terus berkembang. Klik tombol untuk mengunjungi perpustakaan.', colors:['#0a1628','#1a3a6b','#2d6abf','#7eb8f7'], url:'https://frontend-production-ac9a.up.railway.app/', isLibrary:true},
-  {type:'sculpture',title:'Lingkaran Abadi', artist:'Eko Prasetyo',  year:'2020', desc:'Simpul toroidal emas melambangkan siklus kehidupan yang tak pernah berujung.',               color:0xd4a020, shape:'torusKnot'},
-  {type:'sculpture',title:'Bola Biru Bumi',  artist:'Mega Sari',     year:'2019', desc:'Bola baja biru merepresentasikan bumi dan rapuhnya ekosistem kita.',                         color:0x2060c0, shape:'sphere'},
-  {type:'sculpture',title:'Puncak Merah',    artist:'Eko Prasetyo',  year:'2021', desc:'Ikosahedron merah — tekad manusia meraih puncak melalui kerja keras dan keberanian.',        color:0xc02828, shape:'icosahedron'},
-];
-
-// ═══════════════════════════════════════════════════════════
-//  TextureFactory
-// ═══════════════════════════════════════════════════════════
-const TextureFactory = (() => {
-  function make(fn, size, rx=1, ry=1){
-    const c=document.createElement('canvas'); c.width=c.height=size;
-    fn(c.getContext('2d'),size);
-    const t=new THREE.CanvasTexture(c);
-    t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(rx,ry); return t;
-  }
-  function floor(){ return make((ctx,S)=>{
-    const g=ctx.createLinearGradient(0,0,S,S);
-    g.addColorStop(0,'#ede5d5');g.addColorStop(.5,'#f0eae0');g.addColorStop(1,'#ddd5c0');
-    ctx.fillStyle=g;ctx.fillRect(0,0,S,S);
-    for(let i=0;i<14;i++){
-      ctx.beginPath();ctx.strokeStyle=`rgba(140,115,82,${.07+Math.random()*.14})`;ctx.lineWidth=.5+Math.random()*1.2;
-      let x=Math.random()*S,y=Math.random()*S;ctx.moveTo(x,y);
-      for(let j=0;j<7;j++){x+=(Math.random()-.5)*60;y+=(Math.random()-.5)*38;ctx.lineTo(x,y);}ctx.stroke();
-    }
-  },512,8,8);}
-  function wall(){ return make((ctx,S)=>{
-    ctx.fillStyle='#1c1610';ctx.fillRect(0,0,S,S);
-    const rh=48;
-    for(let r=0;r*rh<S+rh;r++){
-      const bw=r%2===0?88:72;
-      for(let x=0;x<S;x+=bw){const v=13+Math.random()*9;ctx.fillStyle=`rgb(${v+5},${v+1},${v-2})`;ctx.fillRect(x+1,r*rh+1,bw-2,rh-2);}
-      ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(0,r*rh,S,1);
-      for(let x=0;x<S;x+=r%2===0?88:72)ctx.fillRect(x,r*rh,1,rh);
-    }
-  },256,3,2);}
-  function ceiling(){ return make((ctx,S)=>{
-    ctx.fillStyle='#18140e';ctx.fillRect(0,0,S,S);
-    ctx.strokeStyle='rgba(75,55,28,.38)';ctx.lineWidth=2.5;
-    for(let i=0;i<=S;i+=128){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,S);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(S,i);ctx.stroke();}
-  },256,5,5);}
-  function painting(colors){ return make((ctx,S)=>{
-    const H=S*.8;
-    const g=ctx.createLinearGradient(0,0,S,H);g.addColorStop(0,colors[0]);g.addColorStop(1,colors[1]||colors[0]);
-    ctx.fillStyle=g;ctx.fillRect(0,0,S,H);
-    const st=Math.floor(Math.random()*4);
-    if(st===0){for(let i=0;i<10;i++){ctx.fillStyle=colors[i%colors.length]+Math.floor(70+Math.random()*85).toString(16);ctx.save();ctx.translate(Math.random()*S,Math.random()*H);ctx.rotate((Math.random()-.5)*.7);ctx.fillRect(-50-Math.random()*75,-24-Math.random()*50,78+Math.random()*105,42+Math.random()*75);ctx.restore();}}
-    else if(st===1){for(let i=0;i<6;i++){const cx=Math.random()*S,cy=Math.random()*H,r=44+Math.random()*88;const rg=ctx.createRadialGradient(cx,cy,0,cx,cy,r);rg.addColorStop(0,colors[i%colors.length]+'dd');rg.addColorStop(1,colors[(i+1)%colors.length]+'00');ctx.fillStyle=rg;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();}}
-    else if(st===2){[.5,.72,1].forEach((b,i,a)=>{const from=H*(a[i-1]||0),to=H*b;const bg=ctx.createLinearGradient(0,from,0,to);bg.addColorStop(0,colors[i%colors.length]+'cc');bg.addColorStop(1,colors[(i+1)%colors.length]+'cc');ctx.fillStyle=bg;ctx.fillRect(0,from,S,to-from);});}
-    else{for(let i=0;i<28;i++){ctx.strokeStyle=colors[i%colors.length]+Math.floor(80+Math.random()*95).toString(16);ctx.lineWidth=4+Math.random()*12;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(Math.random()*S,Math.random()*H);ctx.bezierCurveTo(Math.random()*S,Math.random()*H,Math.random()*S,Math.random()*H,Math.random()*S,Math.random()*H);ctx.stroke();}}
-    const vig=ctx.createRadialGradient(S/2,H/2,H*.1,S/2,H/2,H*.78);vig.addColorStop(0,'rgba(0,0,0,0)');vig.addColorStop(1,'rgba(0,0,0,.36)');ctx.fillStyle=vig;ctx.fillRect(0,0,S,H);
-  },256,1,1);}
-  function library(){ return make((ctx,S)=>{
-    const H=S;
-    // dark wood background
-    ctx.fillStyle='#1a0e06';ctx.fillRect(0,0,S,H);
-    // shelf rows
-    const shelfH=Math.floor(H/4);
-    const bookColors=['#8B1a1a','#1a4a8B','#1a6b2a','#7a5a10','#5a1a6b','#8B4a1a','#1a5a5a','#6b3a10','#2a2a8B','#8B6a1a','#3a6b1a','#6b1a3a','#1a3a6b','#8B3a10','#4a8B1a','#8B1a5a','#107a7a','#5a8B10'];
-    for(let row=0;row<4;row++){
-      const sy=row*shelfH;
-      // shelf plank
-      const sg=ctx.createLinearGradient(0,sy+shelfH-10,0,sy+shelfH);
-      sg.addColorStop(0,'#6b4a20');sg.addColorStop(1,'#3a2408');
-      ctx.fillStyle=sg;ctx.fillRect(0,sy+shelfH-10,S,10);
-      // shadow under shelf
-      ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(0,sy+shelfH,S,4);
-      // books
-      let x=4;
-      while(x<S-8){
-        const bw=14+Math.floor(Math.random()*18);
-        const bh=shelfH-18-Math.floor(Math.random()*14);
-        const by=sy+shelfH-10-bh;
-        const ci=Math.floor(Math.random()*bookColors.length);
-        // book spine gradient
-        const bg=ctx.createLinearGradient(x,0,x+bw,0);
-        bg.addColorStop(0,bookColors[ci]+'cc');
-        bg.addColorStop(.3,bookColors[ci]);
-        bg.addColorStop(1,bookColors[(ci+3)%bookColors.length]+'99');
-        ctx.fillStyle=bg;ctx.fillRect(x,by,bw,bh);
-        // spine line
-        ctx.fillStyle='rgba(0,0,0,.35)';ctx.fillRect(x,by,1,bh);ctx.fillRect(x+bw-1,by,1,bh);
-        // title stripe
-        ctx.fillStyle='rgba(255,255,255,.18)';
-        const ts=by+Math.floor(bh*.25),th=Math.floor(bh*.12);
-        ctx.fillRect(x+2,ts,bw-4,th);
-        // slight tilt for tall books
-        if(bh>50&&Math.random()>.6){ctx.fillStyle='rgba(0,0,0,.2)';ctx.beginPath();ctx.moveTo(x,by);ctx.lineTo(x+2,by-4);ctx.lineTo(x+bw-1,by-4);ctx.lineTo(x+bw-1,by);ctx.fill();}
-        x+=bw+1;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Museum 3D</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
       }
-    }
-    // vignette
-    const vig=ctx.createRadialGradient(S/2,H/2,H*.1,S/2,H/2,H*.75);vig.addColorStop(0,'rgba(0,0,0,0)');vig.addColorStop(1,'rgba(0,0,0,.55)');ctx.fillStyle=vig;ctx.fillRect(0,0,S,H);
-    // title overlay
-    ctx.fillStyle='rgba(200,160,80,.82)';ctx.font='bold 22px Georgia,serif';ctx.textAlign='center';ctx.letterSpacing='4px';
-    ctx.fillText('PERPUSTAKAAN',S/2,H*.88);
-    ctx.fillStyle='rgba(200,160,80,.45)';ctx.font='12px Georgia,serif';
-    ctx.fillText('DIGITAL',S/2,H*.93);
-  },512,1,1);}
-  return {floor,wall,ceiling,painting,library};
-})();
-
-// ═══════════════════════════════════════════════════════════
-//  Materials singleton
-// ═══════════════════════════════════════════════════════════
-const Materials = (()=>{
-  let c=null;
-  return { get(){
-    if(!c) c={
-      floor   :new THREE.MeshLambertMaterial({map:TextureFactory.floor()}),
-      wall    :new THREE.MeshLambertMaterial({map:TextureFactory.wall()}),
-      ceiling :new THREE.MeshLambertMaterial({map:TextureFactory.ceiling()}),
-      gold    :new THREE.MeshLambertMaterial({color:0xb8902a}),
-      darkGold:new THREE.MeshLambertMaterial({color:0x7a5c18}),
-      pedestal:new THREE.MeshLambertMaterial({color:0x1e1c18}),
-      glass   :new THREE.MeshLambertMaterial({color:0x88c0d8,transparent:true,opacity:.26}),
-    };
-    return c;
-  }};
-})();
-
-// ═══════════════════════════════════════════════════════════
-//  Museum
-// ═══════════════════════════════════════════════════════════
-const Museum = (()=>{
-  const ROOM={W:22,D:28,H:5.5};
-  function add(scene,geo,mat,x,y,z,ry=0){
-    const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.rotation.y=ry;scene.add(m);return m;
-  }
-  function build(scene){
-    const m=Materials.get();const {W,D,H}=ROOM;
-    const fl=new THREE.Mesh(new THREE.PlaneGeometry(W,D),m.floor);fl.rotation.x=-Math.PI/2;scene.add(fl);
-    const ce=new THREE.Mesh(new THREE.PlaneGeometry(W,D),m.ceiling);ce.rotation.x=Math.PI/2;ce.position.y=H;scene.add(ce);
-    const wNS=new THREE.PlaneGeometry(W,H),wEW=new THREE.PlaneGeometry(D,H);
-    const wN=new THREE.Mesh(wNS,m.wall);wN.position.set(0,H/2,-D/2);scene.add(wN);
-    const wS=new THREE.Mesh(wNS.clone(),m.wall);wS.rotation.y=Math.PI;wS.position.set(0,H/2,D/2);scene.add(wS);
-    const wE=new THREE.Mesh(wEW,m.wall);wE.rotation.y=-Math.PI/2;wE.position.set(W/2,H/2,0);scene.add(wE);
-    const wW=new THREE.Mesh(wEW.clone(),m.wall);wW.rotation.y=Math.PI/2;wW.position.set(-W/2,H/2,0);scene.add(wW);
-    const pG=new THREE.BoxGeometry(.6,H,.6),cG=new THREE.BoxGeometry(.85,.16,.85),bG=new THREE.BoxGeometry(.85,.14,.85);
-    [[-7,-6],[7,-6],[-7,0],[7,0],[-7,6],[7,6]].forEach(([x,z])=>{add(scene,pG,m.wall,x,H/2,z);add(scene,cG,m.gold,x,H-.08,z);add(scene,bG,m.gold,x,.07,z);});
-    const mW=new THREE.BoxGeometry(W,.12,.2),mD=new THREE.BoxGeometry(D,.12,.2),cy=H-.06;
-    add(scene,mW.clone(),m.gold,0,cy,-D/2+.12);add(scene,mW.clone(),m.gold,0,cy,D/2-.12);
-    add(scene,mD.clone(),m.gold,-W/2+.12,cy,0,Math.PI/2);add(scene,mD.clone(),m.gold,W/2-.12,cy,0,Math.PI/2);
-    add(scene,mW.clone(),m.darkGold,0,.06,-D/2+.12);add(scene,mW.clone(),m.darkGold,0,.06,D/2-.12);
-    add(scene,mD.clone(),m.darkGold,-W/2+.12,.06,0,Math.PI/2);add(scene,mD.clone(),m.darkGold,W/2-.12,.06,0,Math.PI/2);
-  }
-  return {build,ROOM};
-})();
-
-// ═══════════════════════════════════════════════════════════
-//  Lighting
-// ═══════════════════════════════════════════════════════════
-const Lighting = (()=>{
-  function build(scene){
-    scene.add(new THREE.AmbientLight(0x3a2e18,.7));
-    const cg=new THREE.SphereGeometry(.11,6,6),cm=new THREE.MeshBasicMaterial({color:0xfff0cc});
-    [[-8,-8],[8,-8],[-8,0],[8,0],[-8,8],[8,8],[0,-8],[0,8],[0,0]].forEach(([x,z])=>{
-      const pt=new THREE.PointLight(0xfff0cc,.55,16);pt.position.set(x,Museum.ROOM.H-.3,z);scene.add(pt);
-      const cap=new THREE.Mesh(cg,cm);cap.position.copy(pt.position);scene.add(cap);
-    });
-  }
-  return {build};
-})();
-
-// ═══════════════════════════════════════════════════════════
-//  Painting
-// ═══════════════════════════════════════════════════════════
-const Painting = (()=>{
-  function create(scene,data,pos,rotY,w=3.2,h=2.4){
-    const m=Materials.get();const g=new THREE.Group();g.position.copy(pos);g.rotation.y=rotY;
-    g.add(new THREE.Mesh(new THREE.BoxGeometry(w+.22,h+.22,.1),m.gold));
-    g.add(new THREE.Mesh(new THREE.BoxGeometry(w+.06,h+.06,.11),m.darkGold));
-    let paintingMap;
-    if(data.isLibrary){
-      paintingMap=new THREE.TextureLoader().load('perpuskuno.png');
-      paintingMap.encoding=THREE.sRGBEncoding;
-    } else {
-      paintingMap=TextureFactory.painting(data.colors);
-    }
-    const cv=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshLambertMaterial({map:paintingMap}));
-    cv.position.z=.07;g.add(cv);
-    const pl=new THREE.Mesh(new THREE.BoxGeometry(1.4,.07,.05),m.gold);pl.position.set(0,-(h/2+.24),.04);g.add(pl);
-    const li=new THREE.PointLight(0xfff4d8,1.0,6);li.position.set(0,2.6,-1.3);g.add(li);
-    scene.add(g);
-    return {position:pos.clone().setY(1.7),radius:3.0,data};
-  }
-  return {create};
-})();
-
-// ═══════════════════════════════════════════════════════════
-//  Sculpture
-// ═══════════════════════════════════════════════════════════
-const Sculpture = (()=>{
-  const GEO={
-    torusKnot:()=>new THREE.TorusKnotGeometry(.35,.12,96,14),
-    sphere:()=>new THREE.SphereGeometry(.45,26,26),
-    icosahedron:()=>new THREE.IcosahedronGeometry(.48,1),
-    torus:()=>new THREE.TorusGeometry(.36,.15,18,42),
-  };
-  function create(scene,data,pos){
-    const m=Materials.get();const g=new THREE.Group();g.position.copy(pos);
-    const base=new THREE.Mesh(new THREE.CylinderGeometry(.5,.56,1,16),m.pedestal);base.position.y=.5;g.add(base);
-    const cg=new THREE.CylinderGeometry(.56,.56,.07,16);
-    const ct=new THREE.Mesh(cg,m.gold);ct.position.y=1.04;g.add(ct);
-    const cb=new THREE.Mesh(cg.clone(),m.gold);cb.position.y=.035;g.add(cb);
-    const dome=new THREE.Mesh(new THREE.SphereGeometry(.6,20,12,0,Math.PI*2,0,Math.PI/2),m.glass);dome.position.y=1.08;g.add(dome);
-    const sc=new THREE.Mesh((GEO[data.shape]||GEO.torus)(),new THREE.MeshLambertMaterial({color:data.color}));sc.position.y=1.66;g.add(sc);
-    const li=new THREE.PointLight(0xfff0c8,1.4,6);li.position.set(0,5,0);g.add(li);
-    scene.add(g);
-    return {mesh:sc,position:pos.clone().setY(1.7),radius:2.6,data};
-  }
-  return {create};
-})();
-
-// ═══════════════════════════════════════════════════════════
-//  InfoPanel
-// ═══════════════════════════════════════════════════════════
-class InfoPanel{
-  constructor(){
-    this._el=document.getElementById('panel');
-    this._title=document.getElementById('p-title');
-    this._desc=document.getElementById('p-desc');
-    this._meta=document.getElementById('p-meta');
-    this._tag=document.getElementById('p-tag');
-    this._linkWrap=document.getElementById('p-link-wrap');
-    this._link=document.getElementById('p-link');
-    this._last=null;
-
-    // hover style for library link
-    this._link.addEventListener('mouseenter',()=>{this._link.style.background='#c8a050';this._link.style.color='#080604';});
-    this._link.addEventListener('mouseleave',()=>{this._link.style.background='transparent';this._link.style.color='#c8a050';});
-  }
-  update(camPos,exhibits){
-    let nearest=null,minD=Infinity;
-    for(const ex of exhibits){const d=camPos.distanceTo(ex.position);if(d<ex.radius&&d<minD){minD=d;nearest=ex;}}
-    if(nearest===this._last)return;
-    this._last=nearest;
-    if(nearest){
-      const d=nearest.data;
-      this._title.textContent=d.title;
-      this._desc.textContent=d.desc;
-      this._meta.textContent=`${d.artist} · ${d.year}`;
-      if(d.isLibrary){
-        this._tag.textContent='Perpustakaan Digital';
-        this._tag.style.borderColor='#2d6abf';
-        this._tag.style.color='#7eb8f7';
-        this._link.href=d.url;
-        this._linkWrap.style.display='block';
-      } else {
-        this._tag.textContent='Koleksi Tetap';
-        this._tag.style.borderColor='';
-        this._tag.style.color='';
-        this._linkWrap.style.display='none';
+      body {
+        overflow: hidden;
+        background: #080604;
+        font-family: Georgia, "Times New Roman", serif;
+        color: #9a8060;
+        user-select: none;
       }
-      this._el.classList.add('on');
-    }
-    else this._el.classList.remove('on');
-  }
-  hide(){this._last=null;this._el.classList.remove('on');}
-}
+      canvas {
+        display: block;
+        cursor: grab;
+      }
+      canvas.dragging {
+        cursor: grabbing;
+      }
 
-// ═══════════════════════════════════════════════════════════
-//  DragControls — NO pointer lock needed
-// ═══════════════════════════════════════════════════════════
-class DragControls{
-  constructor(camera,canvas){
-    this._cam=camera;this._canvas=canvas;
-    this._yaw=Math.PI;this._pitch=0;
-    this._dragging=false;this._lx=0;this._ly=0;
-    this._keys=new Set();
-    this._btnKeys=new Set(); // virtual keys from on-screen buttons
+      #loading {
+        position: fixed;
+        inset: 0;
+        background: #080604;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 200;
+        transition: opacity 0.8s ease;
+      }
+      #loading h1 {
+        color: #c8a050;
+        font-size: 2.6rem;
+        letter-spacing: 0.45em;
+        text-transform: uppercase;
+        font-weight: normal;
+        margin-bottom: 0.3rem;
+      }
+      .l-sub {
+        color: #5a4a2a;
+        font-size: 0.65rem;
+        letter-spacing: 0.38em;
+        text-transform: uppercase;
+        margin-bottom: 2.5rem;
+      }
+      .l-bar {
+        width: 180px;
+        height: 1px;
+        background: #2a1e0e;
+      }
+      .l-fill {
+        height: 100%;
+        background: #c8a050;
+        width: 0%;
+        transition: width 0.18s ease;
+      }
+      .l-lbl {
+        margin-top: 0.9rem;
+        color: #3a2e18;
+        font-size: 0.6rem;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+      }
 
-    // Mouse drag
-    canvas.addEventListener('mousedown',e=>{this._dragging=true;this._lx=e.clientX;this._ly=e.clientY;canvas.classList.add('dragging');});
-    window.addEventListener('mouseup',()=>{this._dragging=false;canvas.classList.remove('dragging');});
-    window.addEventListener('mousemove',e=>{
-      if(!this._dragging)return;
-      this._yaw  -=(e.clientX-this._lx)*.003;
-      this._pitch-=(e.clientY-this._ly)*.003;
-      this._pitch=Math.max(-1.0,Math.min(1.0,this._pitch));
-      this._lx=e.clientX;this._ly=e.clientY;
-    });
+      #hint {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(
+          ellipse at center,
+          rgba(8, 6, 4, 0.5) 0%,
+          rgba(8, 6, 4, 0.88) 100%
+        );
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        transition: opacity 0.4s;
+      }
+      #hint.off {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .h-title {
+        color: #c8a050;
+        font-size: 1.5rem;
+        letter-spacing: 0.38em;
+        text-transform: uppercase;
+        font-weight: normal;
+        margin-bottom: 0.5rem;
+      }
+      .h-sub {
+        color: #6a5a3a;
+        font-size: 0.68rem;
+        letter-spacing: 0.18em;
+        margin-bottom: 1.6rem;
+      }
+      .divider {
+        width: 50px;
+        height: 1px;
+        background: #3a2e18;
+        margin: 0 auto 1.5rem;
+      }
+      .h-ctrl {
+        color: #4a3e28;
+        font-size: 0.62rem;
+        letter-spacing: 0.12em;
+        line-height: 2.3;
+        text-transform: uppercase;
+        text-align: center;
+      }
+      .h-ctrl span {
+        color: #8a7050;
+      }
+      .h-btn {
+        margin-top: 1.8rem;
+        background: transparent;
+        border: 1px solid #c8a050;
+        color: #c8a050;
+        font-family: Georgia, serif;
+        font-size: 0.68rem;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        padding: 0.6rem 2rem;
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
+      .h-btn:hover {
+        background: #c8a050;
+        color: #080604;
+      }
 
-    // Touch drag
-    canvas.addEventListener('touchstart',e=>{if(e.touches.length===1){this._dragging=true;this._lx=e.touches[0].clientX;this._ly=e.touches[0].clientY;}},{passive:true});
-    window.addEventListener('touchend',()=>{this._dragging=false;});
-    window.addEventListener('touchmove',e=>{
-      if(!this._dragging||e.touches.length!==1)return;
-      this._yaw  -=(e.touches[0].clientX-this._lx)*.003;
-      this._pitch-=(e.touches[0].clientY-this._ly)*.003;
-      this._pitch=Math.max(-1.0,Math.min(1.0,this._pitch));
-      this._lx=e.touches[0].clientX;this._ly=e.touches[0].clientY;
-    },{passive:true});
+      #xhair {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 10;
+        opacity: 0.6;
+      }
 
-    // Keyboard
-    window.addEventListener('keydown',e=>{this._keys.add(e.code);if(['Space','ArrowUp','ArrowDown'].includes(e.code))e.preventDefault();});
-    window.addEventListener('keyup',e=>this._keys.delete(e.code));
+      #panel {
+        position: fixed;
+        bottom: 5vh;
+        left: 50%;
+        transform: translateX(-50%) translateY(8px);
+        background: rgba(8, 6, 4, 0.93);
+        border: 1px solid #2a2010;
+        border-top: 1px solid #c8a050;
+        padding: 1rem 2.2rem 1.2rem;
+        min-width: 320px;
+        max-width: 460px;
+        text-align: center;
+        z-index: 50;
+        opacity: 0;
+        pointer-events: none;
+        transition:
+          opacity 0.3s,
+          transform 0.3s;
+      }
+      #panel.on {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+        pointer-events: auto;
+      }
+      #p-title {
+        color: #c8a050;
+        font-size: 0.92rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        margin-bottom: 0.4rem;
+      }
+      #p-desc {
+        color: #9a8060;
+        font-size: 0.73rem;
+        line-height: 1.7;
+      }
+      #p-meta {
+        color: #3a2e18;
+        font-size: 0.6rem;
+        letter-spacing: 0.16em;
+        margin-top: 0.6rem;
+      }
+      .p-tag {
+        display: inline-block;
+        border: 1px solid #3a2e18;
+        color: #5a4a28;
+        font-size: 0.56rem;
+        letter-spacing: 0.14em;
+        padding: 0.1rem 0.5rem;
+        margin-top: 0.45rem;
+        text-transform: uppercase;
+      }
 
-    // On-screen buttons
-    this._bindBtn('b-f','ArrowUp');this._bindBtn('b-b','ArrowDown');
-    this._bindBtn('b-l','ArrowLeft');this._bindBtn('b-r','ArrowRight');
-  }
+      #rlabel {
+        position: fixed;
+        top: 20px;
+        left: 24px;
+        z-index: 10;
+      }
+      .rl-h {
+        display: block;
+        color: #3a2e18;
+        font-size: 0.55rem;
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+      }
+      .rl-n {
+        display: block;
+        color: #8a7050;
+        font-size: 0.7rem;
+        letter-spacing: 0.22em;
+        margin-top: 0.12rem;
+        text-transform: uppercase;
+      }
 
-  _bindBtn(id,code){
-    const el=document.getElementById(id);
-    if(!el)return;
-    const add=()=>this._btnKeys.add(code);
-    const rem=()=>this._btnKeys.delete(code);
-    el.addEventListener('mousedown',add);el.addEventListener('mouseup',rem);el.addEventListener('mouseleave',rem);
-    el.addEventListener('touchstart',e=>{e.preventDefault();add();},{passive:false});
-    el.addEventListener('touchend',rem);el.addEventListener('touchcancel',rem);
-  }
+      #hud {
+        position: fixed;
+        bottom: 20px;
+        right: 24px;
+        color: #2a2010;
+        font-size: 0.56rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        line-height: 2.1;
+        text-align: right;
+        z-index: 10;
+      }
+      #hud span {
+        color: #4a3e28;
+      }
 
-  update(dt){
-    const s=4.5*dt;
-    const allKeys=new Set([...this._keys,...this._btnKeys]);
-    const fwd=new THREE.Vector3(-Math.sin(this._yaw),0,-Math.cos(this._yaw));
-    const rgt=new THREE.Vector3(Math.cos(this._yaw),0,-Math.sin(this._yaw));
-    if(allKeys.has('KeyW')||allKeys.has('ArrowUp'))   this._cam.position.addScaledVector(fwd, s);
-    if(allKeys.has('KeyS')||allKeys.has('ArrowDown')) this._cam.position.addScaledVector(fwd,-s);
-    if(allKeys.has('KeyA')||allKeys.has('ArrowLeft')) this._cam.position.addScaledVector(rgt,-s);
-    if(allKeys.has('KeyD')||allKeys.has('ArrowRight'))this._cam.position.addScaledVector(rgt, s);
-    const hw=22/2-.65,hd=28/2-.65;
-    this._cam.position.x=Math.max(-hw,Math.min(hw,this._cam.position.x));
-    this._cam.position.z=Math.max(-hd,Math.min(hd,this._cam.position.z));
-    this._cam.position.y=1.7;
-    this._cam.rotation.order='YXZ';
-    this._cam.rotation.y=this._yaw;
-    this._cam.rotation.x=this._pitch;
-  }
-}
+      /* on-screen joystick buttons for mobile / no-keyboard */
+      #btns {
+        position: fixed;
+        bottom: 24px;
+        left: 24px;
+        z-index: 10;
+        display: grid;
+        grid-template-columns: repeat(3, 40px);
+        grid-template-rows: repeat(2, 40px);
+        gap: 4px;
+      }
+      .btn {
+        background: rgba(8, 6, 4, 0.7);
+        border: 1px solid #3a2e18;
+        color: #6a5a3a;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border-radius: 4px;
+        touch-action: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .btn:active {
+        background: rgba(200, 160, 80, 0.15);
+        border-color: #c8a050;
+        color: #c8a050;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Loading -->
+    <div id="loading">
+      <h1>Museum</h1>
+      <p class="l-sub">Galeri Seni Digital</p>
+      <div class="l-bar"><div class="l-fill" id="l-fill"></div></div>
+      <p class="l-lbl" id="l-lbl">Memuat galeri…</p>
+    </div>
 
-// ═══════════════════════════════════════════════════════════
-//  LoadingScreen
-// ═══════════════════════════════════════════════════════════
-function runLoadingScreen(){
-  return new Promise(resolve=>{
-    const el=document.getElementById('loading'),fill=document.getElementById('l-fill'),lbl=document.getElementById('l-lbl');
-    const stages=['Memuat arsitektur…','Memasang lukisan…','Menyalakan lampu…','Membuka pintu…'];
-    let p=0;
-    const t=setInterval(()=>{
-      p+=Math.random()*11+4;fill.style.width=Math.min(p,100)+'%';
-      lbl.textContent=stages[Math.min(Math.floor(p/27),stages.length-1)];
-      if(p>=100){clearInterval(t);setTimeout(()=>{el.style.opacity='0';setTimeout(()=>{el.style.display='none';resolve();},800);},300);}
-    },160);
-  });
-}
+    <!-- Welcome / controls hint -->
+    <div id="hint">
+      <p class="h-title">Selamat Datang</p>
+      <p class="h-sub">Museum Seni Digital</p>
+      <div class="divider"></div>
+      <div class="h-ctrl">
+        <span>W A S D</span> atau <span>Arrow</span> — Bergerak<br />
+        <span>Drag Mouse</span> — Pandangan<br />
+        <span>Tombol ↑↓←→</span> — Gerak di layar
+      </div>
+      <button class="h-btn" id="enter-btn">Masuk Museum</button>
+    </div>
 
-// ═══════════════════════════════════════════════════════════
-//  MuseumApp
-// ═══════════════════════════════════════════════════════════
-class MuseumApp{
-  constructor(){
-    this._exhibits=[];this._sculpts=[];this._clock=new THREE.Clock();
-    this._elRlName=document.getElementById('rl-name');
-  }
-  _initRenderer(){
-    const r=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
-    r.setSize(innerWidth,innerHeight);r.setPixelRatio(Math.min(devicePixelRatio,1.5));
-    r.outputEncoding=THREE.sRGBEncoding;document.body.appendChild(r.domElement);this._renderer=r;
-  }
-  _initScene(){
-    const s=new THREE.Scene();s.fog=new THREE.FogExp2(0x100c08,.028);s.background=new THREE.Color(0x100c08);this._scene=s;
-  }
-  _initCamera(){
-    const c=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.05,60);c.position.set(0,1.7,7);this._camera=c;
-  }
-  _buildExhibits(){
-    const {W,D}=Museum.ROOM,s=this._scene;
-    const paintings=EXHIBITS.filter(e=>e.type==='painting');
-    const sculpts=EXHIBITS.filter(e=>e.type==='sculpture');
-    paintings.slice(0,3).forEach((d,i)=>this._exhibits.push(Painting.create(s,d,new THREE.Vector3([-6,0,6][i],2.8,-D/2+.35),0,3.4,2.4)));
-    paintings.slice(3,5).forEach((d,i)=>this._exhibits.push(Painting.create(s,d,new THREE.Vector3(W/2-.35,2.9,[-6,2][i]),-Math.PI/2,3.0,2.2)));
-    paintings.slice(5,7).forEach((d,i)=>this._exhibits.push(Painting.create(s,d,new THREE.Vector3(-W/2+.35,2.9,[-6,2][i]),Math.PI/2,3.0,2.2)));
-    paintings.slice(7,9).forEach((d,i)=>this._exhibits.push(Painting.create(s,d,new THREE.Vector3([-5,5][i],2.8,D/2-.35),Math.PI,3.0,2.2)));
-    const spos=[new THREE.Vector3(-3.5,0,-3),new THREE.Vector3(3.5,0,-3),new THREE.Vector3(0,0,4)];
-    sculpts.forEach((d,i)=>{const ex=Sculpture.create(s,d,spos[i]);this._exhibits.push(ex);this._sculpts.push(ex.mesh);});
-  }
-  _roomLabel(z){
-    this._elRlName.textContent=z<-6?'Galeri Utara — Lukisan':z>6?'Galeri Selatan — Lukisan':'Aula Tengah — Patung';
-  }
-  _loop(){
-    requestAnimationFrame(()=>this._loop());
-    const dt=this._clock.getDelta();
-    this._controls.update(dt);
-    this._roomLabel(this._camera.position.z);
-    this._panel.update(this._camera.position,this._exhibits);
-    const t=this._clock.elapsedTime;
-    this._sculpts.forEach((m,i)=>{m.rotation.y=t*(.24+i*.07);});
-    this._renderer.render(this._scene,this._camera);
-  }
-  async start(){
-    this._initRenderer();this._initScene();this._initCamera();
-    Museum.build(this._scene);Lighting.build(this._scene);this._buildExhibits();
-    this._panel=new InfoPanel();
-    this._controls=new DragControls(this._camera,this._renderer.domElement);
-    window.addEventListener('resize',()=>{
-      this._camera.aspect=innerWidth/innerHeight;this._camera.updateProjectionMatrix();this._renderer.setSize(innerWidth,innerHeight);
-    });
-    // Welcome hint dismiss
-    const hint=document.getElementById('hint');
-    const dismiss=()=>hint.classList.add('off');
-    document.getElementById('enter-btn').addEventListener('click',dismiss);
-    this._renderer.domElement.addEventListener('mousedown',dismiss);
-    this._renderer.domElement.addEventListener('touchstart',dismiss,{passive:true});
-    await runLoadingScreen();
-    this._loop();
-  }
-}
+    <!-- Crosshair -->
+    <svg id="xhair" width="20" height="20" viewBox="0 0 20 20">
+      <line x1="10" y1="2" x2="10" y2="7" stroke="#c8a050" stroke-width="1" />
+      <line x1="10" y1="13" x2="10" y2="18" stroke="#c8a050" stroke-width="1" />
+      <line x1="2" y1="10" x2="7" y2="10" stroke="#c8a050" stroke-width="1" />
+      <line x1="13" y1="10" x2="18" y2="10" stroke="#c8a050" stroke-width="1" />
+      <circle cx="10" cy="10" r="1.2" fill="#c8a050" opacity=".6" />
+    </svg>
 
-new MuseumApp().start();
-</script>
-</body>
+    <!-- Info panel -->
+    <div id="panel">
+      <p id="p-title"></p>
+      <p id="p-desc"></p>
+      <p id="p-meta"></p>
+      <span class="p-tag" id="p-tag">Koleksi Tetap</span>
+      <div id="p-link-wrap" style="display: none; margin-top: 0.8rem">
+        <a
+          id="p-link"
+          href="#"
+          target="_blank"
+          rel="noopener"
+          style="
+            display: inline-block;
+            background: transparent;
+            border: 1px solid #c8a050;
+            color: #c8a050;
+            font-family: Georgia, serif;
+            font-size: 0.68rem;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            padding: 0.5rem 1.6rem;
+            text-decoration: none;
+            transition:
+              background 0.2s,
+              color 0.2s;
+            cursor: pointer;
+          "
+        >
+          Kunjungi Perpustakaan &#8594;
+        </a>
+      </div>
+    </div>
+
+    <!-- Room label -->
+    <div id="rlabel">
+      <span class="rl-h">Lokasi</span>
+      <span class="rl-n" id="rl-name">Lobby Utama</span>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud">
+      <span>Drag</span> pandangan<br />
+      <span>WASD</span> bergerak
+    </div>
+
+    <!-- On-screen move buttons (row1: blank, fwd, blank / row2: left, back, right) -->
+    <div id="btns">
+      <div></div>
+      <div class="btn" id="b-f">↑</div>
+      <div></div>
+      <div class="btn" id="b-l">←</div>
+      <div class="btn" id="b-b">↓</div>
+      <div class="btn" id="b-r">→</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+      "use strict";
+
+      // ═══════════════════════════════════════════════════════════
+      //  DATA
+      // ═══════════════════════════════════════════════════════════
+      const EXHIBITS = [
+        {
+          type: "painting",
+          title: "Harmoni Cahaya",
+          artist: "Rina Dewanto",
+          year: "2021",
+          desc: "Ekspresi abstrak tentang perjalanan waktu melalui gelombang warna yang saling berpadu.",
+          colors: ["#0e2a4a", "#1a6090", "#e87820", "#f0a030"],
+        },
+        {
+          type: "painting",
+          title: "Kota Imajiner",
+          artist: "Bima Santoso",
+          year: "2019",
+          desc: "Karya geometris menggambarkan kompleksitas kehidupan urban — kaca, baja, dan cahaya neon.",
+          colors: ["#120820", "#602080", "#c040a0", "#40c0e0"],
+        },
+        {
+          type: "painting",
+          title: "Hutan Mimpi",
+          artist: "Laras Utami",
+          year: "2020",
+          desc: "Interpretasi organis dari alam liar melalui sapuan warna hijau yang bebas dan energik.",
+          colors: ["#081a10", "#1a5830", "#40a050", "#90d840"],
+        },
+        {
+          type: "painting",
+          title: "Lautan Waktu",
+          artist: "Farhan Rizki",
+          year: "2018",
+          desc: "Meditasi visual tentang kedalaman samudra sebagai metafora perjalanan jiwa.",
+          colors: ["#040c1c", "#082050", "#1060a0", "#30b0e0"],
+        },
+        {
+          type: "painting",
+          title: "Api Jiwa",
+          artist: "Rina Dewanto",
+          year: "2022",
+          desc: "Energi kehidupan yang berpijar — palet warna panas meledak dalam satu momen abadi.",
+          colors: ["#2a0800", "#a01808", "#e05010", "#f0a020"],
+        },
+        {
+          type: "painting",
+          title: "Batas Langit",
+          artist: "Yusuf Hakim",
+          year: "2023",
+          desc: "Panorama abstrak tentang horizon dan kemungkinan tak terbatas yang menanti di baliknya.",
+          colors: ["#080015", "#301880", "#6040c0", "#c0a0ff"],
+        },
+        {
+          type: "painting",
+          title: "Akar Bumi",
+          artist: "Sri Wulandari",
+          year: "2017",
+          desc: "Eksplorasi hubungan organis antara tanah, akar, dan kehidupan — warisan leluhur.",
+          colors: ["#120800", "#4a2008", "#905020", "#c88030"],
+        },
+        {
+          type: "painting",
+          title: "Chat Ocean",
+          artist: "Xina",
+          year: "2026",
+          desc: "Platform obrolan inovatif berbasis web yang menghubungkan orang-orang",
+          colors: ["#007bff", "#0056b3", "#003366", "#001133"],
+          url: "https://chatoceanfrontend-production.up.railway.app",
+          isChatOcean: true,
+        },
+        {
+          type: "painting",
+          title: "Perpustakaan Kuno",
+          artist: "Xina",
+          year: "2026",
+          desc: "Jelajahi koleksi buku, artikel, dan referensi digital kami yang terus berkembang. Klik tombol untuk mengunjungi perpustakaan.",
+          colors: ["#0a1628", "#1a3a6b", "#2d6abf", "#7eb8f7"],
+          url: "https://frontend-production-ac9a.up.railway.app/",
+          isLibrary: true,
+        },
+        {
+          type: "sculpture",
+          title: "Lingkaran Abadi",
+          artist: "Eko Prasetyo",
+          year: "2020",
+          desc: "Simpul toroidal emas melambangkan siklus kehidupan yang tak pernah berujung.",
+          color: 0xd4a020,
+          shape: "torusKnot",
+        },
+        {
+          type: "sculpture",
+          title: "Bola Biru Bumi",
+          artist: "Mega Sari",
+          year: "2019",
+          desc: "Bola baja biru merepresentasikan bumi dan rapuhnya ekosistem kita.",
+          color: 0x2060c0,
+          shape: "sphere",
+        },
+        {
+          type: "sculpture",
+          title: "Puncak Merah",
+          artist: "Eko Prasetyo",
+          year: "2021",
+          desc: "Ikosahedron merah — tekad manusia meraih puncak melalui kerja keras dan keberanian.",
+          color: 0xc02828,
+          shape: "icosahedron",
+        },
+      ];
+
+      // ═══════════════════════════════════════════════════════════
+      //  TextureFactory
+      // ═══════════════════════════════════════════════════════════
+      const TextureFactory = (() => {
+        function make(fn, size, rx = 1, ry = 1) {
+          const c = document.createElement("canvas");
+          c.width = c.height = size;
+          fn(c.getContext("2d"), size);
+          const t = new THREE.CanvasTexture(c);
+          t.wrapS = t.wrapT = THREE.RepeatWrapping;
+          t.repeat.set(rx, ry);
+          return t;
+        }
+        function floor() {
+          return make(
+            (ctx, S) => {
+              const g = ctx.createLinearGradient(0, 0, S, S);
+              g.addColorStop(0, "#ede5d5");
+              g.addColorStop(0.5, "#f0eae0");
+              g.addColorStop(1, "#ddd5c0");
+              ctx.fillStyle = g;
+              ctx.fillRect(0, 0, S, S);
+              for (let i = 0; i < 14; i++) {
+                ctx.beginPath();
+                ctx.strokeStyle = `rgba(140,115,82,${0.07 + Math.random() * 0.14})`;
+                ctx.lineWidth = 0.5 + Math.random() * 1.2;
+                let x = Math.random() * S,
+                  y = Math.random() * S;
+                ctx.moveTo(x, y);
+                for (let j = 0; j < 7; j++) {
+                  x += (Math.random() - 0.5) * 60;
+                  y += (Math.random() - 0.5) * 38;
+                  ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+              }
+            },
+            512,
+            8,
+            8,
+          );
+        }
+        function wall() {
+          return make(
+            (ctx, S) => {
+              ctx.fillStyle = "#1c1610";
+              ctx.fillRect(0, 0, S, S);
+              const rh = 48;
+              for (let r = 0; r * rh < S + rh; r++) {
+                const bw = r % 2 === 0 ? 88 : 72;
+                for (let x = 0; x < S; x += bw) {
+                  const v = 13 + Math.random() * 9;
+                  ctx.fillStyle = `rgb(${v + 5},${v + 1},${v - 2})`;
+                  ctx.fillRect(x + 1, r * rh + 1, bw - 2, rh - 2);
+                }
+                ctx.fillStyle = "rgba(0,0,0,.5)";
+                ctx.fillRect(0, r * rh, S, 1);
+                for (let x = 0; x < S; x += r % 2 === 0 ? 88 : 72)
+                  ctx.fillRect(x, r * rh, 1, rh);
+              }
+            },
+            256,
+            3,
+            2,
+          );
+        }
+        function ceiling() {
+          return make(
+            (ctx, S) => {
+              ctx.fillStyle = "#18140e";
+              ctx.fillRect(0, 0, S, S);
+              ctx.strokeStyle = "rgba(75,55,28,.38)";
+              ctx.lineWidth = 2.5;
+              for (let i = 0; i <= S; i += 128) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, S);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(S, i);
+                ctx.stroke();
+              }
+            },
+            256,
+            5,
+            5,
+          );
+        }
+        function painting(colors) {
+          return make(
+            (ctx, S) => {
+              const H = S * 0.8;
+              const g = ctx.createLinearGradient(0, 0, S, H);
+              g.addColorStop(0, colors[0]);
+              g.addColorStop(1, colors[1] || colors[0]);
+              ctx.fillStyle = g;
+              ctx.fillRect(0, 0, S, H);
+              const st = Math.floor(Math.random() * 4);
+              if (st === 0) {
+                for (let i = 0; i < 10; i++) {
+                  ctx.fillStyle =
+                    colors[i % colors.length] +
+                    Math.floor(70 + Math.random() * 85).toString(16);
+                  ctx.save();
+                  ctx.translate(Math.random() * S, Math.random() * H);
+                  ctx.rotate((Math.random() - 0.5) * 0.7);
+                  ctx.fillRect(
+                    -50 - Math.random() * 75,
+                    -24 - Math.random() * 50,
+                    78 + Math.random() * 105,
+                    42 + Math.random() * 75,
+                  );
+                  ctx.restore();
+                }
+              } else if (st === 1) {
+                for (let i = 0; i < 6; i++) {
+                  const cx = Math.random() * S,
+                    cy = Math.random() * H,
+                    r = 44 + Math.random() * 88;
+                  const rg = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+                  rg.addColorStop(0, colors[i % colors.length] + "dd");
+                  rg.addColorStop(1, colors[(i + 1) % colors.length] + "00");
+                  ctx.fillStyle = rg;
+                  ctx.beginPath();
+                  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                  ctx.fill();
+                }
+              } else if (st === 2) {
+                [0.5, 0.72, 1].forEach((b, i, a) => {
+                  const from = H * (a[i - 1] || 0),
+                    to = H * b;
+                  const bg = ctx.createLinearGradient(0, from, 0, to);
+                  bg.addColorStop(0, colors[i % colors.length] + "cc");
+                  bg.addColorStop(1, colors[(i + 1) % colors.length] + "cc");
+                  ctx.fillStyle = bg;
+                  ctx.fillRect(0, from, S, to - from);
+                });
+              } else {
+                for (let i = 0; i < 28; i++) {
+                  ctx.strokeStyle =
+                    colors[i % colors.length] +
+                    Math.floor(80 + Math.random() * 95).toString(16);
+                  ctx.lineWidth = 4 + Math.random() * 12;
+                  ctx.lineCap = "round";
+                  ctx.beginPath();
+                  ctx.moveTo(Math.random() * S, Math.random() * H);
+                  ctx.bezierCurveTo(
+                    Math.random() * S,
+                    Math.random() * H,
+                    Math.random() * S,
+                    Math.random() * H,
+                    Math.random() * S,
+                    Math.random() * H,
+                  );
+                  ctx.stroke();
+                }
+              }
+              const vig = ctx.createRadialGradient(
+                S / 2,
+                H / 2,
+                H * 0.1,
+                S / 2,
+                H / 2,
+                H * 0.78,
+              );
+              vig.addColorStop(0, "rgba(0,0,0,0)");
+              vig.addColorStop(1, "rgba(0,0,0,.36)");
+              ctx.fillStyle = vig;
+              ctx.fillRect(0, 0, S, H);
+            },
+            256,
+            1,
+            1,
+          );
+        }
+        function library() {
+          return make(
+            (ctx, S) => {
+              const H = S;
+              // dark wood background
+              ctx.fillStyle = "#1a0e06";
+              ctx.fillRect(0, 0, S, H);
+              // shelf rows
+              const shelfH = Math.floor(H / 4);
+              const bookColors = [
+                "#8B1a1a",
+                "#1a4a8B",
+                "#1a6b2a",
+                "#7a5a10",
+                "#5a1a6b",
+                "#8B4a1a",
+                "#1a5a5a",
+                "#6b3a10",
+                "#2a2a8B",
+                "#8B6a1a",
+                "#3a6b1a",
+                "#6b1a3a",
+                "#1a3a6b",
+                "#8B3a10",
+                "#4a8B1a",
+                "#8B1a5a",
+                "#107a7a",
+                "#5a8B10",
+              ];
+              for (let row = 0; row < 4; row++) {
+                const sy = row * shelfH;
+                // shelf plank
+                const sg = ctx.createLinearGradient(
+                  0,
+                  sy + shelfH - 10,
+                  0,
+                  sy + shelfH,
+                );
+                sg.addColorStop(0, "#6b4a20");
+                sg.addColorStop(1, "#3a2408");
+                ctx.fillStyle = sg;
+                ctx.fillRect(0, sy + shelfH - 10, S, 10);
+                // shadow under shelf
+                ctx.fillStyle = "rgba(0,0,0,.5)";
+                ctx.fillRect(0, sy + shelfH, S, 4);
+                // books
+                let x = 4;
+                while (x < S - 8) {
+                  const bw = 14 + Math.floor(Math.random() * 18);
+                  const bh = shelfH - 18 - Math.floor(Math.random() * 14);
+                  const by = sy + shelfH - 10 - bh;
+                  const ci = Math.floor(Math.random() * bookColors.length);
+                  // book spine gradient
+                  const bg = ctx.createLinearGradient(x, 0, x + bw, 0);
+                  bg.addColorStop(0, bookColors[ci] + "cc");
+                  bg.addColorStop(0.3, bookColors[ci]);
+                  bg.addColorStop(
+                    1,
+                    bookColors[(ci + 3) % bookColors.length] + "99",
+                  );
+                  ctx.fillStyle = bg;
+                  ctx.fillRect(x, by, bw, bh);
+                  // spine line
+                  ctx.fillStyle = "rgba(0,0,0,.35)";
+                  ctx.fillRect(x, by, 1, bh);
+                  ctx.fillRect(x + bw - 1, by, 1, bh);
+                  // title stripe
+                  ctx.fillStyle = "rgba(255,255,255,.18)";
+                  const ts = by + Math.floor(bh * 0.25),
+                    th = Math.floor(bh * 0.12);
+                  ctx.fillRect(x + 2, ts, bw - 4, th);
+                  // slight tilt for tall books
+                  if (bh > 50 && Math.random() > 0.6) {
+                    ctx.fillStyle = "rgba(0,0,0,.2)";
+                    ctx.beginPath();
+                    ctx.moveTo(x, by);
+                    ctx.lineTo(x + 2, by - 4);
+                    ctx.lineTo(x + bw - 1, by - 4);
+                    ctx.lineTo(x + bw - 1, by);
+                    ctx.fill();
+                  }
+                  x += bw + 1;
+                }
+              }
+              // vignette
+              const vig = ctx.createRadialGradient(
+                S / 2,
+                H / 2,
+                H * 0.1,
+                S / 2,
+                H / 2,
+                H * 0.75,
+              );
+              vig.addColorStop(0, "rgba(0,0,0,0)");
+              vig.addColorStop(1, "rgba(0,0,0,.55)");
+              ctx.fillStyle = vig;
+              ctx.fillRect(0, 0, S, H);
+              // title overlay
+              ctx.fillStyle = "rgba(200,160,80,.82)";
+              ctx.font = "bold 22px Georgia,serif";
+              ctx.textAlign = "center";
+              ctx.letterSpacing = "4px";
+              ctx.fillText("PERPUSTAKAAN", S / 2, H * 0.88);
+              ctx.fillStyle = "rgba(200,160,80,.45)";
+              ctx.font = "12px Georgia,serif";
+              ctx.fillText("DIGITAL", S / 2, H * 0.93);
+            },
+            512,
+            1,
+            1,
+          );
+        }
+        return { floor, wall, ceiling, painting, library };
+      })();
+
+      // ═══════════════════════════════════════════════════════════
+      //  Materials singleton
+      // ═══════════════════════════════════════════════════════════
+      const Materials = (() => {
+        let c = null;
+        return {
+          get() {
+            if (!c)
+              c = {
+                floor: new THREE.MeshLambertMaterial({
+                  map: TextureFactory.floor(),
+                }),
+                wall: new THREE.MeshLambertMaterial({
+                  map: TextureFactory.wall(),
+                }),
+                ceiling: new THREE.MeshLambertMaterial({
+                  map: TextureFactory.ceiling(),
+                }),
+                gold: new THREE.MeshLambertMaterial({ color: 0xb8902a }),
+                darkGold: new THREE.MeshLambertMaterial({ color: 0x7a5c18 }),
+                pedestal: new THREE.MeshLambertMaterial({ color: 0x1e1c18 }),
+                glass: new THREE.MeshLambertMaterial({
+                  color: 0x88c0d8,
+                  transparent: true,
+                  opacity: 0.26,
+                }),
+              };
+            return c;
+          },
+        };
+      })();
+
+      // ═══════════════════════════════════════════════════════════
+      //  Museum
+      // ═══════════════════════════════════════════════════════════
+      const Museum = (() => {
+        const ROOM = { W: 22, D: 28, H: 5.5 };
+        function add(scene, geo, mat, x, y, z, ry = 0) {
+          const m = new THREE.Mesh(geo, mat);
+          m.position.set(x, y, z);
+          m.rotation.y = ry;
+          scene.add(m);
+          return m;
+        }
+        function build(scene) {
+          const m = Materials.get();
+          const { W, D, H } = ROOM;
+          const fl = new THREE.Mesh(new THREE.PlaneGeometry(W, D), m.floor);
+          fl.rotation.x = -Math.PI / 2;
+          scene.add(fl);
+          const ce = new THREE.Mesh(new THREE.PlaneGeometry(W, D), m.ceiling);
+          ce.rotation.x = Math.PI / 2;
+          ce.position.y = H;
+          scene.add(ce);
+          const wNS = new THREE.PlaneGeometry(W, H),
+            wEW = new THREE.PlaneGeometry(D, H);
+          const wN = new THREE.Mesh(wNS, m.wall);
+          wN.position.set(0, H / 2, -D / 2);
+          scene.add(wN);
+          const wS = new THREE.Mesh(wNS.clone(), m.wall);
+          wS.rotation.y = Math.PI;
+          wS.position.set(0, H / 2, D / 2);
+          scene.add(wS);
+          const wE = new THREE.Mesh(wEW, m.wall);
+          wE.rotation.y = -Math.PI / 2;
+          wE.position.set(W / 2, H / 2, 0);
+          scene.add(wE);
+          const wW = new THREE.Mesh(wEW.clone(), m.wall);
+          wW.rotation.y = Math.PI / 2;
+          wW.position.set(-W / 2, H / 2, 0);
+          scene.add(wW);
+          const pG = new THREE.BoxGeometry(0.6, H, 0.6),
+            cG = new THREE.BoxGeometry(0.85, 0.16, 0.85),
+            bG = new THREE.BoxGeometry(0.85, 0.14, 0.85);
+          [
+            [-7, -6],
+            [7, -6],
+            [-7, 0],
+            [7, 0],
+            [-7, 6],
+            [7, 6],
+          ].forEach(([x, z]) => {
+            add(scene, pG, m.wall, x, H / 2, z);
+            add(scene, cG, m.gold, x, H - 0.08, z);
+            add(scene, bG, m.gold, x, 0.07, z);
+          });
+          const mW = new THREE.BoxGeometry(W, 0.12, 0.2),
+            mD = new THREE.BoxGeometry(D, 0.12, 0.2),
+            cy = H - 0.06;
+          add(scene, mW.clone(), m.gold, 0, cy, -D / 2 + 0.12);
+          add(scene, mW.clone(), m.gold, 0, cy, D / 2 - 0.12);
+          add(scene, mD.clone(), m.gold, -W / 2 + 0.12, cy, 0, Math.PI / 2);
+          add(scene, mD.clone(), m.gold, W / 2 - 0.12, cy, 0, Math.PI / 2);
+          add(scene, mW.clone(), m.darkGold, 0, 0.06, -D / 2 + 0.12);
+          add(scene, mW.clone(), m.darkGold, 0, 0.06, D / 2 - 0.12);
+          add(
+            scene,
+            mD.clone(),
+            m.darkGold,
+            -W / 2 + 0.12,
+            0.06,
+            0,
+            Math.PI / 2,
+          );
+          add(
+            scene,
+            mD.clone(),
+            m.darkGold,
+            W / 2 - 0.12,
+            0.06,
+            0,
+            Math.PI / 2,
+          );
+        }
+        return { build, ROOM };
+      })();
+
+      // ═══════════════════════════════════════════════════════════
+      //  Lighting
+      // ═══════════════════════════════════════════════════════════
+      const Lighting = (() => {
+        function build(scene) {
+          scene.add(new THREE.AmbientLight(0x3a2e18, 0.7));
+          const cg = new THREE.SphereGeometry(0.11, 6, 6),
+            cm = new THREE.MeshBasicMaterial({ color: 0xfff0cc });
+          [
+            [-8, -8],
+            [8, -8],
+            [-8, 0],
+            [8, 0],
+            [-8, 8],
+            [8, 8],
+            [0, -8],
+            [0, 8],
+            [0, 0],
+          ].forEach(([x, z]) => {
+            const pt = new THREE.PointLight(0xfff0cc, 0.55, 16);
+            pt.position.set(x, Museum.ROOM.H - 0.3, z);
+            scene.add(pt);
+            const cap = new THREE.Mesh(cg, cm);
+            cap.position.copy(pt.position);
+            scene.add(cap);
+          });
+        }
+        return { build };
+      })();
+
+      // ═══════════════════════════════════════════════════════════
+      //  Painting
+      // ═══════════════════════════════════════════════════════════
+      const Painting = (() => {
+        function create(scene, data, pos, rotY, w = 3.2, h = 2.4) {
+          const m = Materials.get();
+          const g = new THREE.Group();
+          g.position.copy(pos);
+          g.rotation.y = rotY;
+          g.add(
+            new THREE.Mesh(
+              new THREE.BoxGeometry(w + 0.22, h + 0.22, 0.1),
+              m.gold,
+            ),
+          );
+          g.add(
+            new THREE.Mesh(
+              new THREE.BoxGeometry(w + 0.06, h + 0.06, 0.11),
+              m.darkGold,
+            ),
+          );
+          let paintingMap;
+          if (data.isLibrary) {
+            paintingMap = new THREE.TextureLoader().load("perpuskuno.png");
+            paintingMap.encoding = THREE.sRGBEncoding;
+          } else if (data.isChatOcean) {
+            paintingMap = new THREE.TextureLoader().load("chatocean.png");
+            paintingMap.encoding = THREE.sRGBEncoding;
+          } else {
+            paintingMap = TextureFactory.painting(data.colors);
+          }
+          const cv = new THREE.Mesh(
+            new THREE.PlaneGeometry(w, h),
+            new THREE.MeshLambertMaterial({ map: paintingMap }),
+          );
+          cv.position.z = 0.07;
+          g.add(cv);
+          const pl = new THREE.Mesh(
+            new THREE.BoxGeometry(1.4, 0.07, 0.05),
+            m.gold,
+          );
+          pl.position.set(0, -(h / 2 + 0.24), 0.04);
+          g.add(pl);
+          const li = new THREE.PointLight(0xfff4d8, 1.0, 6);
+          li.position.set(0, 2.6, -1.3);
+          g.add(li);
+          scene.add(g);
+          return { position: pos.clone().setY(1.7), radius: 3.0, data };
+        }
+        return { create };
+      })();
+
+      // ═══════════════════════════════════════════════════════════
+      //  Sculpture
+      // ═══════════════════════════════════════════════════════════
+      const Sculpture = (() => {
+        const GEO = {
+          torusKnot: () => new THREE.TorusKnotGeometry(0.35, 0.12, 96, 14),
+          sphere: () => new THREE.SphereGeometry(0.45, 26, 26),
+          icosahedron: () => new THREE.IcosahedronGeometry(0.48, 1),
+          torus: () => new THREE.TorusGeometry(0.36, 0.15, 18, 42),
+        };
+        function create(scene, data, pos) {
+          const m = Materials.get();
+          const g = new THREE.Group();
+          g.position.copy(pos);
+          const base = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.5, 0.56, 1, 16),
+            m.pedestal,
+          );
+          base.position.y = 0.5;
+          g.add(base);
+          const cg = new THREE.CylinderGeometry(0.56, 0.56, 0.07, 16);
+          const ct = new THREE.Mesh(cg, m.gold);
+          ct.position.y = 1.04;
+          g.add(ct);
+          const cb = new THREE.Mesh(cg.clone(), m.gold);
+          cb.position.y = 0.035;
+          g.add(cb);
+          const dome = new THREE.Mesh(
+            new THREE.SphereGeometry(
+              0.6,
+              20,
+              12,
+              0,
+              Math.PI * 2,
+              0,
+              Math.PI / 2,
+            ),
+            m.glass,
+          );
+          dome.position.y = 1.08;
+          g.add(dome);
+          const sc = new THREE.Mesh(
+            (GEO[data.shape] || GEO.torus)(),
+            new THREE.MeshLambertMaterial({ color: data.color }),
+          );
+          sc.position.y = 1.66;
+          g.add(sc);
+          const li = new THREE.PointLight(0xfff0c8, 1.4, 6);
+          li.position.set(0, 5, 0);
+          g.add(li);
+          scene.add(g);
+          return {
+            mesh: sc,
+            position: pos.clone().setY(1.7),
+            radius: 2.6,
+            data,
+          };
+        }
+        return { create };
+      })();
+
+      // ═══════════════════════════════════════════════════════════
+      //  InfoPanel
+      // ═══════════════════════════════════════════════════════════
+      class InfoPanel {
+        constructor() {
+          this._el = document.getElementById("panel");
+          this._title = document.getElementById("p-title");
+          this._desc = document.getElementById("p-desc");
+          this._meta = document.getElementById("p-meta");
+          this._tag = document.getElementById("p-tag");
+          this._linkWrap = document.getElementById("p-link-wrap");
+          this._link = document.getElementById("p-link");
+          this._last = null;
+
+          // hover style for library link
+          this._link.addEventListener("mouseenter", () => {
+            this._link.style.background = "#c8a050";
+            this._link.style.color = "#080604";
+          });
+          this._link.addEventListener("mouseleave", () => {
+            this._link.style.background = "transparent";
+            this._link.style.color = "#c8a050";
+          });
+        }
+        update(camPos, exhibits) {
+          let nearest = null,
+            minD = Infinity;
+          for (const ex of exhibits) {
+            const d = camPos.distanceTo(ex.position);
+            if (d < ex.radius && d < minD) {
+              minD = d;
+              nearest = ex;
+            }
+          }
+          if (nearest === this._last) return;
+          this._last = nearest;
+          if (nearest) {
+            const d = nearest.data;
+            this._title.textContent = d.title;
+            this._desc.textContent = d.desc;
+            this._meta.textContent = `${d.artist} · ${d.year}`;
+            if (d.isLibrary) {
+              this._tag.textContent = "Perpustakaan Kuno";
+              this._tag.style.borderColor = "#2d6abf";
+              this._tag.style.color = "#7eb8f7";
+              this._link.href = d.url;
+              this._linkWrap.style.display = "block";
+            } else if (d.isChatOcean) {
+              this._tag.textContent = "Chat Ocean";
+              this._tag.style.borderColor = "#007bff";
+              this._tag.style.color = "#0056b3";
+              this._link.href = d.url;
+              this._linkWrap.style.display = "block";
+            } else {
+              this._tag.textContent = "Koleksi Tetap";
+              this._tag.style.borderColor = "";
+              this._tag.style.color = "";
+              this._linkWrap.style.display = "none";
+            }
+            this._el.classList.add("on");
+          } else this._el.classList.remove("on");
+        }
+        hide() {
+          this._last = null;
+          this._el.classList.remove("on");
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      //  DragControls — NO pointer lock needed
+      // ═══════════════════════════════════════════════════════════
+      class DragControls {
+        constructor(camera, canvas) {
+          this._cam = camera;
+          this._canvas = canvas;
+          this._yaw = Math.PI;
+          this._pitch = 0;
+          this._dragging = false;
+          this._lx = 0;
+          this._ly = 0;
+          this._keys = new Set();
+          this._btnKeys = new Set(); // virtual keys from on-screen buttons
+
+          // Mouse drag
+          canvas.addEventListener("mousedown", (e) => {
+            this._dragging = true;
+            this._lx = e.clientX;
+            this._ly = e.clientY;
+            canvas.classList.add("dragging");
+          });
+          window.addEventListener("mouseup", () => {
+            this._dragging = false;
+            canvas.classList.remove("dragging");
+          });
+          window.addEventListener("mousemove", (e) => {
+            if (!this._dragging) return;
+            this._yaw -= (e.clientX - this._lx) * 0.003;
+            this._pitch -= (e.clientY - this._ly) * 0.003;
+            this._pitch = Math.max(-1.0, Math.min(1.0, this._pitch));
+            this._lx = e.clientX;
+            this._ly = e.clientY;
+          });
+
+          // Touch drag
+          canvas.addEventListener(
+            "touchstart",
+            (e) => {
+              if (e.touches.length === 1) {
+                this._dragging = true;
+                this._lx = e.touches[0].clientX;
+                this._ly = e.touches[0].clientY;
+              }
+            },
+            { passive: true },
+          );
+          window.addEventListener("touchend", () => {
+            this._dragging = false;
+          });
+          window.addEventListener(
+            "touchmove",
+            (e) => {
+              if (!this._dragging || e.touches.length !== 1) return;
+              this._yaw -= (e.touches[0].clientX - this._lx) * 0.003;
+              this._pitch -= (e.touches[0].clientY - this._ly) * 0.003;
+              this._pitch = Math.max(-1.0, Math.min(1.0, this._pitch));
+              this._lx = e.touches[0].clientX;
+              this._ly = e.touches[0].clientY;
+            },
+            { passive: true },
+          );
+
+          // Keyboard
+          window.addEventListener("keydown", (e) => {
+            this._keys.add(e.code);
+            if (["Space", "ArrowUp", "ArrowDown"].includes(e.code))
+              e.preventDefault();
+          });
+          window.addEventListener("keyup", (e) => this._keys.delete(e.code));
+
+          // On-screen buttons
+          this._bindBtn("b-f", "ArrowUp");
+          this._bindBtn("b-b", "ArrowDown");
+          this._bindBtn("b-l", "ArrowLeft");
+          this._bindBtn("b-r", "ArrowRight");
+        }
+
+        _bindBtn(id, code) {
+          const el = document.getElementById(id);
+          if (!el) return;
+          const add = () => this._btnKeys.add(code);
+          const rem = () => this._btnKeys.delete(code);
+          el.addEventListener("mousedown", add);
+          el.addEventListener("mouseup", rem);
+          el.addEventListener("mouseleave", rem);
+          el.addEventListener(
+            "touchstart",
+            (e) => {
+              e.preventDefault();
+              add();
+            },
+            { passive: false },
+          );
+          el.addEventListener("touchend", rem);
+          el.addEventListener("touchcancel", rem);
+        }
+
+        update(dt) {
+          const s = 4.5 * dt;
+          const allKeys = new Set([...this._keys, ...this._btnKeys]);
+          const fwd = new THREE.Vector3(
+            -Math.sin(this._yaw),
+            0,
+            -Math.cos(this._yaw),
+          );
+          const rgt = new THREE.Vector3(
+            Math.cos(this._yaw),
+            0,
+            -Math.sin(this._yaw),
+          );
+          if (allKeys.has("KeyW") || allKeys.has("ArrowUp"))
+            this._cam.position.addScaledVector(fwd, s);
+          if (allKeys.has("KeyS") || allKeys.has("ArrowDown"))
+            this._cam.position.addScaledVector(fwd, -s);
+          if (allKeys.has("KeyA") || allKeys.has("ArrowLeft"))
+            this._cam.position.addScaledVector(rgt, -s);
+          if (allKeys.has("KeyD") || allKeys.has("ArrowRight"))
+            this._cam.position.addScaledVector(rgt, s);
+          const hw = 22 / 2 - 0.65,
+            hd = 28 / 2 - 0.65;
+          this._cam.position.x = Math.max(
+            -hw,
+            Math.min(hw, this._cam.position.x),
+          );
+          this._cam.position.z = Math.max(
+            -hd,
+            Math.min(hd, this._cam.position.z),
+          );
+          this._cam.position.y = 1.7;
+          this._cam.rotation.order = "YXZ";
+          this._cam.rotation.y = this._yaw;
+          this._cam.rotation.x = this._pitch;
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      //  LoadingScreen
+      // ═══════════════════════════════════════════════════════════
+      function runLoadingScreen() {
+        return new Promise((resolve) => {
+          const el = document.getElementById("loading"),
+            fill = document.getElementById("l-fill"),
+            lbl = document.getElementById("l-lbl");
+          const stages = [
+            "Memuat arsitektur…",
+            "Memasang lukisan…",
+            "Menyalakan lampu…",
+            "Membuka pintu…",
+          ];
+          let p = 0;
+          const t = setInterval(() => {
+            p += Math.random() * 11 + 4;
+            fill.style.width = Math.min(p, 100) + "%";
+            lbl.textContent =
+              stages[Math.min(Math.floor(p / 27), stages.length - 1)];
+            if (p >= 100) {
+              clearInterval(t);
+              setTimeout(() => {
+                el.style.opacity = "0";
+                setTimeout(() => {
+                  el.style.display = "none";
+                  resolve();
+                }, 800);
+              }, 300);
+            }
+          }, 160);
+        });
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      //  MuseumApp
+      // ═══════════════════════════════════════════════════════════
+      class MuseumApp {
+        constructor() {
+          this._exhibits = [];
+          this._sculpts = [];
+          this._clock = new THREE.Clock();
+          this._elRlName = document.getElementById("rl-name");
+        }
+        _initRenderer() {
+          const r = new THREE.WebGLRenderer({
+            antialias: true,
+            powerPreference: "high-performance",
+          });
+          r.setSize(innerWidth, innerHeight);
+          r.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+          r.outputEncoding = THREE.sRGBEncoding;
+          document.body.appendChild(r.domElement);
+          this._renderer = r;
+        }
+        _initScene() {
+          const s = new THREE.Scene();
+          s.fog = new THREE.FogExp2(0x100c08, 0.028);
+          s.background = new THREE.Color(0x100c08);
+          this._scene = s;
+        }
+        _initCamera() {
+          const c = new THREE.PerspectiveCamera(
+            72,
+            innerWidth / innerHeight,
+            0.05,
+            60,
+          );
+          c.position.set(0, 1.7, 7);
+          this._camera = c;
+        }
+        _buildExhibits() {
+          const { W, D } = Museum.ROOM,
+            s = this._scene;
+          const paintings = EXHIBITS.filter((e) => e.type === "painting");
+          const sculpts = EXHIBITS.filter((e) => e.type === "sculpture");
+          paintings
+            .slice(0, 3)
+            .forEach((d, i) =>
+              this._exhibits.push(
+                Painting.create(
+                  s,
+                  d,
+                  new THREE.Vector3([-6, 0, 6][i], 2.8, -D / 2 + 0.35),
+                  0,
+                  3.4,
+                  2.4,
+                ),
+              ),
+            );
+          paintings
+            .slice(3, 5)
+            .forEach((d, i) =>
+              this._exhibits.push(
+                Painting.create(
+                  s,
+                  d,
+                  new THREE.Vector3(W / 2 - 0.35, 2.9, [-6, 2][i]),
+                  -Math.PI / 2,
+                  3.0,
+                  2.2,
+                ),
+              ),
+            );
+          paintings
+            .slice(5, 7)
+            .forEach((d, i) =>
+              this._exhibits.push(
+                Painting.create(
+                  s,
+                  d,
+                  new THREE.Vector3(-W / 2 + 0.35, 2.9, [-6, 2][i]),
+                  Math.PI / 2,
+                  3.0,
+                  2.2,
+                ),
+              ),
+            );
+          paintings
+            .slice(7, 9)
+            .forEach((d, i) =>
+              this._exhibits.push(
+                Painting.create(
+                  s,
+                  d,
+                  new THREE.Vector3([-5, 5][i], 2.8, D / 2 - 0.35),
+                  Math.PI,
+                  3.0,
+                  2.2,
+                ),
+              ),
+            );
+          const spos = [
+            new THREE.Vector3(-3.5, 0, -3),
+            new THREE.Vector3(3.5, 0, -3),
+            new THREE.Vector3(0, 0, 4),
+          ];
+          sculpts.forEach((d, i) => {
+            const ex = Sculpture.create(s, d, spos[i]);
+            this._exhibits.push(ex);
+            this._sculpts.push(ex.mesh);
+          });
+        }
+        _roomLabel(z) {
+          this._elRlName.textContent =
+            z < -6
+              ? "Galeri Utara — Lukisan"
+              : z > 6
+                ? "Galeri Selatan — Lukisan"
+                : "Aula Tengah — Patung";
+        }
+        _loop() {
+          requestAnimationFrame(() => this._loop());
+          const dt = this._clock.getDelta();
+          this._controls.update(dt);
+          this._roomLabel(this._camera.position.z);
+          this._panel.update(this._camera.position, this._exhibits);
+          const t = this._clock.elapsedTime;
+          this._sculpts.forEach((m, i) => {
+            m.rotation.y = t * (0.24 + i * 0.07);
+          });
+          this._renderer.render(this._scene, this._camera);
+        }
+        async start() {
+          this._initRenderer();
+          this._initScene();
+          this._initCamera();
+          Museum.build(this._scene);
+          Lighting.build(this._scene);
+          this._buildExhibits();
+          this._panel = new InfoPanel();
+          this._controls = new DragControls(
+            this._camera,
+            this._renderer.domElement,
+          );
+          window.addEventListener("resize", () => {
+            this._camera.aspect = innerWidth / innerHeight;
+            this._camera.updateProjectionMatrix();
+            this._renderer.setSize(innerWidth, innerHeight);
+          });
+          // Welcome hint dismiss
+          const hint = document.getElementById("hint");
+          const dismiss = () => hint.classList.add("off");
+          document
+            .getElementById("enter-btn")
+            .addEventListener("click", dismiss);
+          this._renderer.domElement.addEventListener("mousedown", dismiss);
+          this._renderer.domElement.addEventListener("touchstart", dismiss, {
+            passive: true,
+          });
+          await runLoadingScreen();
+          this._loop();
+        }
+      }
+
+      new MuseumApp().start();
+    </script>
+  </body>
 </html>
