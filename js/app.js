@@ -8,14 +8,15 @@
  * Dependensi: THREE (global via CDN)
  */
 
-import { EXHIBITS }        from "./data/exhibits.js";
-import { buildMuseum, ROOM } from "./engine/Museum.js";
-import { buildLighting }   from "./engine/Lighting.js";
-import { createPainting }  from "./engine/Painting.js";
-import { createSculpture } from "./engine/Sculpture.js";
-import { InfoPanel }       from "./ui/InfoPanel.js";
-import { DragControls }    from "./ui/DragControls.js";
-import { runLoadingScreen } from "./ui/LoadingScreen.js";
+import { EXHIBITS }          from "./data/exhibits.js";
+import { buildMuseum, ROOM }  from "./engine/Museum.js";
+import { buildLighting }      from "./engine/Lighting.js";
+import { createPainting }     from "./engine/Painting.js";
+import { createSculpture }    from "./engine/Sculpture.js";
+import { createWelcomeBoard } from "./engine/WelcomeBoard.js";
+import { InfoPanel }          from "./ui/InfoPanel.js";
+import { DragControls }       from "./ui/DragControls.js";
+import { runLoadingScreen }   from "./ui/LoadingScreen.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Konstanta layout — sesuaikan posisi lukisan di sini jika perlu
@@ -123,6 +124,9 @@ class MuseumApp {
           Math.PI, 3.0, 2.2),
       );
     });
+
+    // Papan selamat datang — di dekat pintu masuk (selatan, hadap ke dalam)
+    createWelcomeBoard(scene, { x: 0, z: D / 2 - 1.8, rotY: Math.PI });
 
     // Patung di tengah ruangan
     sculptures.forEach((data, i) => {
