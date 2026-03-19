@@ -305,35 +305,184 @@ canvas.dragging {
 }
 
 
-/* ── 6. On-Screen Movement Buttons ───────────────────────────────────────── */
+/* ── 6. Virtual Joystick (mobile) ────────────────────────────────────────── */
 
-#btns {
+/* Base lingkaran — area sentuh */
+#joystick-base {
   position: fixed;
-  bottom: 24px;
-  left: 24px;
-  z-index: 10;
-  display: grid;
-  grid-template-columns: repeat(3, 40px);
-  grid-template-rows: repeat(2, 40px);
-  gap: 4px;
-}
-
-.btn {
-  background: rgba(8, 6, 4, 0.70);
-  border: 1px solid #3a2e18;
-  color: #6a5a3a;
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border-radius: 4px;
+  bottom: 28px;
+  left: 28px;
+  width: 120px;
+  height: 120px;
+  z-index: 20;
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
+  /* Hanya tampil di layar sentuh */
+  display: none;
 }
 
-.btn:active {
-  background: rgba(200, 160, 80, 0.15);
-  border-color: #c8a050;
+/* Tampilkan hanya di perangkat touch */
+@media (pointer: coarse) {
+  #joystick-base {
+    display: block;
+  }
+}
+
+/* Ring luar */
+#joystick-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(8, 6, 4, 0.55);
+  border: 1.5px solid rgba(200, 160, 80, 0.35);
+  backdrop-filter: blur(2px);
+  transition: border-color 0.15s;
+}
+
+#joystick-base.active #joystick-ring {
+  border-color: rgba(200, 160, 80, 0.75);
+  background: rgba(8, 6, 4, 0.70);
+}
+
+/* Garis panduan dalam (+) */
+#joystick-ring::before,
+#joystick-ring::after {
+  content: "";
+  position: absolute;
+  background: rgba(200, 160, 80, 0.12);
+}
+#joystick-ring::before {
+  top: 50%;  left: 20%;  right: 20%;  height: 1px;
+  transform: translateY(-50%);
+}
+#joystick-ring::after {
+  left: 50%; top: 20%; bottom: 20%; width: 1px;
+  transform: translateX(-50%);
+}
+
+/* Anak panah arah (sudut dalam ring) */
+#joystick-base::before {
+  content: "↑";
+  position: absolute;
+  top: 6px; left: 50%;
+  transform: translateX(-50%);
+  color: rgba(200, 160, 80, 0.3);
+  font-size: 0.65rem;
+  line-height: 1;
+  z-index: 1;
+}
+
+/* Knob — bola tengah yang diseret */
+#joystick-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle at 38% 36%,
+    rgba(200, 160, 80, 0.85) 0%,
+    rgba(140, 100, 30, 0.90) 55%,
+    rgba(80, 55, 10, 0.95) 100%
+  );
+  border: 1.5px solid rgba(200, 160, 80, 0.6);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: transform 0.08s ease, box-shadow 0.08s;
+  cursor: grab;
+}
+
+#joystick-base.active #joystick-knob {
+  box-shadow:
+    0 4px 16px rgba(200, 160, 80, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: none; /* No lag while dragging */
+}
+
+/* Hint teks di bawah joystick */
+#joystick-base + .joy-hint {
+  position: fixed;
+  bottom: 10px;
+  left: 28px;
+  color: #3a2e18;
+  font-size: 0.48rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display: none;
+}
+@media (pointer: coarse) {
+  #joystick-base + .joy-hint { display: block; }
+}
+
+
+/* ── 7. Responsive HUD (desktop vs mobile) ──────────────────────────────── */
+
+.hud-touch   { display: none; }
+.hud-desktop { display: inline; }
+
+@media (pointer: coarse) {
+  .hud-touch   { display: inline; }
+  .hud-desktop { display: none; }
+}
+
+
+/* ── 8. Tombol Musik & Badge Now Playing ────────────────────────────────── */
+
+.p-music-btn {
+  background: transparent;
+  border: 1px solid #c8a050;
   color: #c8a050;
+  font-family: Georgia, serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  padding: 0.5rem 1.6rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.p-music-btn:hover {
+  background: #c8a050;
+  color: #080604;
+}
+.p-music-btn.playing {
+  border-color: #ffd060;
+  color: #ffd060;
+  background: rgba(200,160,80,0.12);
+}
+
+#now-playing {
+  position: fixed;
+  bottom: 22px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(8,6,4,0.88);
+  border: 1px solid rgba(200,160,80,0.4);
+  border-left: 2px solid #c8a050;
+  padding: 0.35rem 0.85rem;
+  z-index: 30;
+  animation: np-fadein 0.4s ease;
+}
+@keyframes np-fadein {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:translateY(0);   }
+}
+.np-note {
+  color: #c8a050;
+  font-size: 0.8rem;
+  animation: np-pulse 1.2s ease-in-out infinite;
+}
+@keyframes np-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+.np-text {
+  color: #8a7050;
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }

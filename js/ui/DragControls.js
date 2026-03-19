@@ -2,47 +2,39 @@
  * DragControls.js — Kontrol kamera FPS tanpa pointer lock.
  *
  * Mendukung:
- *   - Drag mouse / touch → putar pandangan
- *   - WASD / Arrow keys → bergerak maju/mundur/kiri/kanan
- *   - Tombol layar virtual (on-screen buttons)
+ *   - Drag mouse / touch (kanan layar) → putar pandangan
+ *   - WASD / Arrow keys               → bergerak
+ *   - Joystick virtual                → bergerak (mobile)
  *   - Batasan tabrakan dinding otomatis
  *
- * Dependensi: THREE (global)
+ * Dependensi: THREE (global), Joystick
  */
 
-/** ID tombol layar yang terdaftar → kode keyboard virtual */
-const BUTTON_MAP = {
-  "b-f": "ArrowUp",
-  "b-b": "ArrowDown",
-  "b-l": "ArrowLeft",
-  "b-r": "ArrowRight",
-};
+import { Joystick } from "./Joystick.js";
 
 export class DragControls {
   /**
    * @param {THREE.PerspectiveCamera} camera
    * @param {HTMLCanvasElement}       canvas
-   * @param {{ W: number, D: number }} roomSize – batas ruangan
+   * @param {{ W: number, D: number }} roomSize
    */
   constructor(camera, canvas, roomSize) {
-    this._cam       = camera;
-    this._yaw       = Math.PI;
-    this._pitch     = 0;
-    this._dragging  = false;
-    this._lx        = 0;
-    this._ly        = 0;
-    this._keys      = new Set();   // Tombol keyboard fisik
-    this._btnKeys   = new Set();   // Tombol layar virtual
-    this._halfW     = roomSize.W / 2 - 0.65;
-    this._halfD     = roomSize.D / 2 - 0.65;
+    this._cam      = camera;
+    this._yaw      = Math.PI;
+    this._pitch    = 0;
+    this._dragging = false;
+    this._lx       = 0;
+    this._ly       = 0;
+    this._keys     = new Set();
+    this._halfW    = roomSize.W / 2 - 0.65;
+    this._halfD    = roomSize.D / 2 - 0.65;
+
+    this._joystick = new Joystick();
 
     this._initMouse(canvas);
     this._initTouch(canvas);
     this._initKeyboard();
-    this._initButtons();
   }
-
-  // ── Input Handlers ──────────────────────────────────────────
 
   _initMouse(canvas) {
     canvas.addEventListener("mousedown", (e) => {
@@ -67,10 +59,14 @@ export class DragControls {
 
   _initTouch(canvas) {
     canvas.addEventListener("touchstart", (e) => {
+      const t = e.touches[0];
+      // Abaikan sentuhan di area joystick (kiri bawah 160x160px)
+      const isJoystickArea = t.clientX < 160 && t.clientY > window.innerHeight - 160;
+      if (isJoystickArea) return;
       if (e.touches.length === 1) {
         this._dragging = true;
-        this._lx = e.touches[0].clientX;
-        this._ly = e.touches[0].clientY;
+        this._lx = t.clientX;
+        this._ly = t.clientY;
       }
     }, { passive: true });
 
@@ -94,31 +90,9 @@ export class DragControls {
     window.addEventListener("keyup", (e) => this._keys.delete(e.code));
   }
 
-  _initButtons() {
-    Object.entries(BUTTON_MAP).forEach(([id, code]) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-
-      const press   = () => this._btnKeys.add(code);
-      const release = () => this._btnKeys.delete(code);
-
-      el.addEventListener("mousedown", press);
-      el.addEventListener("mouseup",   release);
-      el.addEventListener("mouseleave", release);
-      el.addEventListener("touchstart", (e) => { e.preventDefault(); press(); }, { passive: false });
-      el.addEventListener("touchend",   release);
-      el.addEventListener("touchcancel", release);
-    });
-  }
-
-  // ── Update (panggil setiap frame) ──────────────────────────
-
-  /**
-   * @param {number} dt – delta time dalam detik
-   */
   update(dt) {
-    const speed  = 4.5 * dt;
-    const allKeys = new Set([...this._keys, ...this._btnKeys]);
+    const speed   = 4.5 * dt;
+    const allKeys = new Set([...this._keys, ...this._joystick.keys]);
 
     const forward = new THREE.Vector3(-Math.sin(this._yaw), 0, -Math.cos(this._yaw));
     const right   = new THREE.Vector3( Math.cos(this._yaw), 0, -Math.sin(this._yaw));
@@ -132,12 +106,10 @@ export class DragControls {
     if (allKeys.has("KeyD") || allKeys.has("ArrowRight"))
       this._cam.position.addScaledVector(right,  speed);
 
-    // Batasi agar tidak menembus dinding
     this._cam.position.x = Math.max(-this._halfW, Math.min(this._halfW, this._cam.position.x));
     this._cam.position.z = Math.max(-this._halfD, Math.min(this._halfD, this._cam.position.z));
-    this._cam.position.y = 1.7; // Tinggi mata tetap
+    this._cam.position.y = 1.7;
 
-    // Terapkan rotasi kamera
     this._cam.rotation.order = "YXZ";
     this._cam.rotation.y     = this._yaw;
     this._cam.rotation.x     = this._pitch;

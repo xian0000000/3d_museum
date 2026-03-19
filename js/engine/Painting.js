@@ -5,100 +5,85 @@
  *   - Frame emas (luar & dalam)
  *   - Canvas lukisan (tekstur procedural atau PNG)
  *   - Plakat nama di bawah
- *   - Spotlight kecil yang menerangi lukisan
+ *   - Picture light di DEPAN lukisan (bukan belakang dinding)
  *
- * Cara menambah jenis lukisan baru (misal isPortfolio):
- *   1. Tambahkan kondisi baru di blok "Pilih tekstur" di bawah.
- *   2. Tambahkan TextureFactory.namaFungsi() di TextureFactory.js.
- *   3. Tambahkan handling info di InfoPanel.js.
+ * BUG FIX: light.position sebelumnya (0, 2.6, -1.3) = menembus ke
+ * balik dinding untuk semua orientasi. Sekarang (0, h*0.4, 1.4) =
+ * selalu di depan canvas, arah +z lokal = ke dalam ruangan.
  *
  * Dependensi: THREE (global), Materials, TextureFactory
  */
 
-import { Materials } from "./Materials.js";
+import { Materials }      from "./Materials.js";
 import { TextureFactory } from "./TextureFactory.js";
 
-/**
- * Buat satu lukisan dan tambahkan ke scene.
- *
- * @param {THREE.Scene} scene
- * @param {object}      data   – objek dari EXHIBITS
- * @param {THREE.Vector3} pos  – posisi di dunia
- * @param {number}      rotY   – rotasi Y (radian)
- * @param {number}      [w=3.4] – lebar kanvas
- * @param {number}      [h=2.4] – tinggi kanvas
- * @returns {{ position, radius, data }} – dipakai InfoPanel untuk deteksi kedekatan
- */
-export function createPainting(scene, data, pos, rotY, w = 3.4, h = 2.4) {
-  const mat = Materials.get();
+export function createPainting(scene, data, pos, rotY, w = 3.2, h = 2.2) {
+  const mat   = Materials.get();
   const group = new THREE.Group();
   group.position.copy(pos);
   group.rotation.y = rotY;
 
-  // ── Frame luar (emas) ──────────────────────────────────────
+  // ── Frame luar (emas) ────────────────────────────────────────
   group.add(new THREE.Mesh(
-    new THREE.BoxGeometry(w + 0.22, h + 0.22, 0.10),
+    new THREE.BoxGeometry(w + 0.20, h + 0.20, 0.09),
     mat.gold,
   ));
 
-  // ── Frame dalam (emas gelap) ───────────────────────────────
+  // ── Frame dalam (emas gelap) ─────────────────────────────────
   group.add(new THREE.Mesh(
-    new THREE.BoxGeometry(w + 0.06, h + 0.06, 0.11),
+    new THREE.BoxGeometry(w + 0.05, h + 0.05, 0.10),
     mat.darkGold,
   ));
 
-  // ── Pilih tekstur ──────────────────────────────────────────
-  let paintingTex;
-
+  // ── Pilih tekstur ────────────────────────────────────────────
+  let tex;
   if (data.isStatistic) {
-    paintingTex = TextureFactory.statistic();
-
+    tex = TextureFactory.statistic();
   } else if (data.isLibrary) {
-    // Coba muat PNG; jika gagal fallback ke canvas
-    paintingTex = new THREE.TextureLoader().load(
+    tex = new THREE.TextureLoader().load(
       "perpuskuno.png",
       (t) => { t.encoding = THREE.sRGBEncoding; },
       undefined,
-      () => { paintingTex = TextureFactory.library(); },
+      () => { tex = TextureFactory.library(); },
     );
-
   } else if (data.isChatOcean) {
-    paintingTex = new THREE.TextureLoader().load(
+    tex = new THREE.TextureLoader().load(
       "chatocean.png",
       (t) => { t.encoding = THREE.sRGBEncoding; },
     );
-
   } else {
-    paintingTex = TextureFactory.painting(data.colors);
+    tex = TextureFactory.painting(data.colors);
   }
 
-  // ── Canvas lukisan ─────────────────────────────────────────
+  // ── Canvas lukisan ───────────────────────────────────────────
   const canvas = new THREE.Mesh(
     new THREE.PlaneGeometry(w, h),
-    new THREE.MeshLambertMaterial({ map: paintingTex }),
+    new THREE.MeshLambertMaterial({ map: tex }),
   );
-  canvas.position.z = 0.07;
+  canvas.position.z = 0.065;
   group.add(canvas);
 
-  // ── Plakat nama ────────────────────────────────────────────
+  // ── Plakat nama ──────────────────────────────────────────────
   const plaque = new THREE.Mesh(
-    new THREE.BoxGeometry(1.4, 0.07, 0.05),
+    new THREE.BoxGeometry(1.2, 0.06, 0.045),
     mat.gold,
   );
-  plaque.position.set(0, -(h / 2 + 0.24), 0.04);
+  plaque.position.set(0, -(h / 2 + 0.20), 0.04);
   group.add(plaque);
 
-  // ── Spotlight ──────────────────────────────────────────────
-  const spotlight = new THREE.PointLight(0xfff4d8, 1.0, 6);
-  spotlight.position.set(0, 2.6, -1.3);
-  group.add(spotlight);
+  // ── Picture light — DEPAN lukisan, lokal +z ──────────────────
+  // Penting: posisi dalam lokal-space group.
+  // Lokal +z selalu menghadap ke dalam ruangan setelah rotasi Y.
+  // Dengan demikian cahaya SELALU menerangi dari depan, tidak pernah tembus dinding.
+  const light = new THREE.PointLight(0xfff4d0, 1.1, 5.5);
+  light.position.set(0, h * 0.3, 1.4);   // sedikit di atas dan di depan
+  group.add(light);
 
   scene.add(group);
 
-  // Kembalikan metadata untuk InfoPanel
   return {
     position: pos.clone().setY(1.7),
-    radius: 3.0,
+    radius:   3.2,
     data,
   };
 }

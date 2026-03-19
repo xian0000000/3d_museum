@@ -3,27 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Museum Seni Digital 3D — jelajahi galeri interaktif berbasis Three.js" />
+    <meta name="description" content="Museum Seni Digital 3D — galeri interaktif berbasis Three.js" />
     <title>Museum 3D</title>
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
 
-    <!-- ═══════════════════════════════════════════════════════
-         Loading Screen
-    ═══════════════════════════════════════════════════════ -->
     <div id="loading">
       <h1>Museum</h1>
       <p class="l-sub">Galeri Seni Digital</p>
-      <div class="l-bar">
-        <div class="l-fill" id="l-fill"></div>
-      </div>
+      <div class="l-bar"><div class="l-fill" id="l-fill"></div></div>
       <p class="l-lbl" id="l-lbl">Memuat galeri…</p>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════
-         Welcome / Controls Hint
-    ═══════════════════════════════════════════════════════ -->
     <div id="hint">
       <p class="h-title">Selamat Datang</p>
       <p class="h-sub">Museum Seni Digital</p>
@@ -31,14 +23,12 @@
       <div class="h-ctrl">
         <span>W A S D</span> atau <span>Arrow</span> — Bergerak<br />
         <span>Drag Mouse</span> — Pandangan<br />
-        <span>Tombol ↑↓←→</span> — Gerak di layar
+        <span class="hud-touch">Joystick kiri</span><span class="hud-touch"> — gerak</span>
+        <span class="hud-desktop">Dekati kubus</span><span class="hud-desktop"> untuk interaksi</span>
       </div>
       <button class="h-btn" id="enter-btn">Masuk Museum</button>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════
-         Crosshair
-    ═══════════════════════════════════════════════════════ -->
     <svg id="xhair" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
       <line x1="10" y1="2"  x2="10" y2="7"  stroke="#c8a050" stroke-width="1"/>
       <line x1="10" y1="13" x2="10" y2="18" stroke="#c8a050" stroke-width="1"/>
@@ -47,9 +37,6 @@
       <circle cx="10" cy="10" r="1.2" fill="#c8a050" opacity=".6"/>
     </svg>
 
-    <!-- ═══════════════════════════════════════════════════════
-         Info Panel — muncul saat mendekati pameran
-    ═══════════════════════════════════════════════════════ -->
     <div id="panel" role="complementary" aria-label="Informasi pameran">
       <p id="p-title"></p>
       <p id="p-desc"></p>
@@ -60,43 +47,30 @@
           Kunjungi Situs &#8594;
         </a>
       </div>
+      <div id="p-music-wrap" style="display:none; margin-top:0.8rem;">
+        <button id="p-music-btn" class="p-music-btn">&#9654;&#xFE0E; Putar Musik</button>
+      </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════
-         Room Label (kiri atas)
-    ═══════════════════════════════════════════════════════ -->
     <div id="rlabel" aria-live="polite">
       <span class="rl-h">Lokasi</span>
       <span class="rl-n" id="rl-name">Lobby Utama</span>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════
-         HUD — petunjuk kontrol (kanan bawah)
-    ═══════════════════════════════════════════════════════ -->
+    <!-- Badge "Now Playing" -->
+    <div id="now-playing" style="display:none" aria-live="polite">
+      <span class="np-note">&#9834;</span>
+      <span class="np-text">Now Playing</span>
+    </div>
+
     <div id="hud" aria-hidden="true">
       <span>Drag</span> pandangan<br />
-      <span>WASD</span> bergerak
+      <span class="hud-desktop">WASD</span><span class="hud-desktop"> bergerak</span>
+      <span class="hud-touch">Joystick</span><span class="hud-touch"> gerak</span>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════
-         On-Screen Movement Buttons (mobile)
-         Layout grid: [ _ ] [↑] [ _ ]
-                      [←] [↓] [→]
-    ═══════════════════════════════════════════════════════ -->
-    <div id="btns" aria-label="Kontrol gerak">
-      <div></div>
-      <div class="btn" id="b-f" aria-label="Maju">↑</div>
-      <div></div>
-      <div class="btn" id="b-l" aria-label="Kiri">←</div>
-      <div class="btn" id="b-b" aria-label="Mundur">↓</div>
-      <div class="btn" id="b-r" aria-label="Kanan">→</div>
-    </div>
+    <div id="joystick-wrap"></div>
 
-    <!-- ═══════════════════════════════════════════════════════
-         Scripts — Three.js (CDN) lalu modul aplikasi
-         Urutan penting: three.min.js harus dimuat duluan
-         agar global THREE tersedia saat app.js dieksekusi.
-    ═══════════════════════════════════════════════════════ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script type="module" src="js/app.js"></script>
 

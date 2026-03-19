@@ -21,7 +21,7 @@ const BOARD_TEXT = {
   tagline:   "Galeri Seni Digital Interaktif",
   divider:   "✦  ✦  ✦",
   body: [
-    "Jelajahi koleksi lukisan dan patung",
+    "Jelajahi koleksi lukisan dan ",
     "dalam ruang tiga dimensi.",
   ],
   controls: "W A S D  ·  DRAG MOUSE  ·  SENTUH LAYAR",
@@ -78,13 +78,13 @@ function makeTexture() {
   ctx.fillStyle = "#7a6040";
   ctx.font = "600 28px Georgia, serif";
   ctx.textAlign = "center";
-  ctx.letterSpacing = "8px";
+  
   ctx.fillText(BOARD_TEXT.subtitle, SIZE / 2, 110);
 
   // ── Judul Utama ───────────────────────────────────────────────
   ctx.fillStyle = "#c8a050";
   ctx.font = "bold 112px Georgia, serif";
-  ctx.letterSpacing = "14px";
+  
   // Bayangan judul
   ctx.shadowColor = "rgba(200,160,80,0.35)";
   ctx.shadowBlur = 18;
@@ -108,19 +108,19 @@ function makeTexture() {
   // ── Tagline ───────────────────────────────────────────────────
   ctx.fillStyle = "#9a8060";
   ctx.font = "italic 34px Georgia, serif";
-  ctx.letterSpacing = "4px";
+  
   ctx.fillText(BOARD_TEXT.tagline, SIZE / 2, 292);
 
   // ── Divider ornamen ───────────────────────────────────────────
   ctx.fillStyle = "rgba(200,160,80,0.45)";
   ctx.font = "24px serif";
-  ctx.letterSpacing = "6px";
+  
   ctx.fillText(BOARD_TEXT.divider, SIZE / 2, 346);
 
   // ── Body teks ─────────────────────────────────────────────────
   ctx.fillStyle = "#7a6a50";
   ctx.font = "28px Georgia, serif";
-  ctx.letterSpacing = "2px";
+  
   BOARD_TEXT.body.forEach((line, i) => {
     ctx.fillText(line, SIZE / 2, 400 + i * 44);
   });
@@ -137,7 +137,7 @@ function makeTexture() {
   // ── Petunjuk kontrol ──────────────────────────────────────────
   ctx.fillStyle = "#3a2e18";
   ctx.font = "22px monospace";
-  ctx.letterSpacing = "4px";
+  
   ctx.fillText(BOARD_TEXT.controls, SIZE / 2, 556);
 
   // ── Nama pembuat ──────────────────────────────────────────────
@@ -149,7 +149,7 @@ function makeTexture() {
 
   ctx.fillStyle = "#c8a050";
   ctx.font = "bold 24px Georgia, serif";
-  ctx.letterSpacing = "5px";
+  
   ctx.fillText(BOARD_TEXT.creator, SIZE / 2, HALF_H - 50);
 
   // Vignette penutup

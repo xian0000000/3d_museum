@@ -326,4 +326,51 @@ export const TextureFactory = {
       ctx.fillText("Riset · Lab · Keuangan", S / 2, S * 0.9);
     }, 512, 1, 1);
   },
+
+  /** Tekstur wajah kubus 3D — icon besar + label + ornamen border */
+  cubeFace(label, icon, bgHex, accentHex) {
+    const S   = 256;
+    const cv  = document.createElement("canvas");
+    cv.width  = cv.height = S;
+    const ctx = cv.getContext("2d");
+
+    ctx.fillStyle = bgHex; ctx.fillRect(0,0,S,S);
+
+    ctx.strokeStyle = accentHex+"1a"; ctx.lineWidth = 0.8;
+    for (let i=0; i<S; i+=S/8) {
+      ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,S); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(S,i); ctx.stroke();
+    }
+
+    ctx.strokeStyle = accentHex+"70"; ctx.lineWidth=6;
+    ctx.strokeRect(10,10,S-20,S-20);
+    ctx.strokeStyle = accentHex+"30"; ctx.lineWidth=1.5;
+    ctx.strokeRect(18,18,S-36,S-36);
+
+    [[18,18],[S-18,18],[18,S-18],[S-18,S-18]].forEach(([cx,cy]) => {
+      const dx=cx<S/2?1:-1, dy=cy<S/2?1:-1;
+      ctx.strokeStyle=accentHex+"cc"; ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+dx*18,cy); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx,cy+dy*18); ctx.stroke();
+    });
+
+    const g=ctx.createRadialGradient(S/2,S/2,0,S/2,S/2,S*0.4);
+    g.addColorStop(0,accentHex+"2a"); g.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle=g; ctx.fillRect(0,0,S,S);
+
+    ctx.fillStyle=accentHex;
+    ctx.font=`bold ${Math.round(S*0.30)}px monospace`;
+    ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(icon,S/2,S*0.42);
+
+    ctx.fillStyle=accentHex+"ee";
+    ctx.font=`bold ${Math.round(S*0.074)}px sans-serif`;
+    ctx.textBaseline="alphabetic";
+    ctx.fillText(label,S/2,S*0.83);
+
+    const t=new THREE.CanvasTexture(cv);
+    t.encoding=THREE.sRGBEncoding;
+    return t;
+  },
+
 };

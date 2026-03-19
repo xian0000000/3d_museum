@@ -1,88 +1,62 @@
 /**
- * Sculpture.js — Membuat patung 3D di atas pedestal museum.
+ * Sculpture.js — Kubus 3D di atas pedestal museum.
  *
- * Setiap patung terdiri dari:
- *   - Pedestal silinder dengan ring emas
- *   - Kubah kaca transparan
- *   - Objek patung (bisa torusKnot, sphere, icosahedron, torus)
- *   - Spotlight dari atas
+ * Setiap kubus: pedestal → ring emas → kubah kaca → BoxGeometry dengan
+ * canvas texture (icon + label) di semua 6 sisi.
  *
- * Cara menambah bentuk patung baru:
- *   1. Tambahkan key baru ke objek GEOMETRIES di bawah.
- *   2. Gunakan key itu sebagai nilai `shape` di data exhibit.
+ * Tambah bentuk baru? Cukup tambah data di exhibits.js — shape tidak
+ * dipakai lagi, semua patung kini kubus berputar.
  *
- * Dependensi: THREE (global), Materials
+ * Dependensi: THREE (global), Materials, TextureFactory
  */
 
-import { Materials } from "./Materials.js";
+import { Materials }      from "./Materials.js";
+import { TextureFactory } from "./TextureFactory.js";
 
-/** Peta nama → fungsi pembuat geometri */
-const GEOMETRIES = {
-  torusKnot:  () => new THREE.TorusKnotGeometry(0.35, 0.12, 96, 14),
-  sphere:     () => new THREE.SphereGeometry(0.45, 26, 26),
-  icosahedron:() => new THREE.IcosahedronGeometry(0.48, 1),
-  torus:      () => new THREE.TorusGeometry(0.36, 0.15, 18, 42),
-  // Tambahkan geometri baru di sini ↓
-};
-
-/**
- * Buat satu patung dan tambahkan ke scene.
- *
- * @param {THREE.Scene}   scene
- * @param {object}        data  – objek dari EXHIBITS (butuh: color, shape)
- * @param {THREE.Vector3} pos   – posisi di dunia
- * @returns {{ mesh, position, radius, data }}
- */
 export function createSculpture(scene, data, pos) {
-  const mat = Materials.get();
+  const mat   = Materials.get();
   const group = new THREE.Group();
   group.position.copy(pos);
 
-  // ── Pedestal ───────────────────────────────────────────────
-  const pedestal = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.5, 0.56, 1, 16),
-    mat.pedestal,
-  );
-  pedestal.position.y = 0.5;
-  group.add(pedestal);
+  // ── Pedestal silinder ─────────────────────────────────────
+  const ped = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.44, 0.50, 1.0, 20), mat.pedestal);
+  ped.position.y = 0.5; group.add(ped);
 
-  const ringGeo = new THREE.CylinderGeometry(0.56, 0.56, 0.07, 16);
-  const ringTop = new THREE.Mesh(ringGeo, mat.gold);
-  ringTop.position.y = 1.04;
-  group.add(ringTop);
+  // ── Ring emas atas & bawah ────────────────────────────────
+  const rg   = new THREE.CylinderGeometry(0.50, 0.50, 0.055, 20);
+  const rTop = new THREE.Mesh(rg,         mat.gold); rTop.position.y = 1.025; group.add(rTop);
+  const rBot = new THREE.Mesh(rg.clone(), mat.gold); rBot.position.y = 0.028; group.add(rBot);
 
-  const ringBot = new THREE.Mesh(ringGeo.clone(), mat.gold);
-  ringBot.position.y = 0.035;
-  group.add(ringBot);
-
-  // ── Kubah kaca ─────────────────────────────────────────────
+  // ── Kubah kaca ────────────────────────────────────────────
   const dome = new THREE.Mesh(
-    new THREE.SphereGeometry(0.6, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2),
-    mat.glass,
-  );
-  dome.position.y = 1.08;
-  group.add(dome);
+    new THREE.SphereGeometry(0.54, 22, 12, 0, Math.PI * 2, 0, Math.PI / 2),
+    mat.glass);
+  dome.position.y = 1.055; group.add(dome);
 
-  // ── Objek patung ───────────────────────────────────────────
-  const geoFn = GEOMETRIES[data.shape] || GEOMETRIES.torus;
-  const sculpture = new THREE.Mesh(
-    geoFn(),
-    new THREE.MeshLambertMaterial({ color: data.color }),
+  // ── Kubus dengan canvas texture ──────────────────────────
+  const faceTex  = TextureFactory.cubeFace(
+    (data.title || "").toUpperCase(),
+    data.icon  || "?",
+    data.bg    || "#0e0a04",
+    data.accent|| "#c8a050",
   );
-  sculpture.position.y = 1.66;
-  group.add(sculpture);
+  const cubeMat  = new THREE.MeshLambertMaterial({ map: faceTex });
+  const cube     = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.62, 0.62), cubeMat);
+  cube.position.y = 1.65;
+  group.add(cube);
 
-  // ── Spotlight ──────────────────────────────────────────────
-  const light = new THREE.PointLight(0xfff0c8, 1.4, 6);
-  light.position.set(0, 5, 0);
-  group.add(light);
+  // ── Spotlight pedestal ────────────────────────────────────
+  const pl = new THREE.PointLight(0xfff8d0, 0.75, 4.5);
+  pl.position.set(0, 4.8, 0); group.add(pl);
 
   scene.add(group);
 
   return {
-    mesh: sculpture,
+    mesh:     cube,
+    group,
     position: pos.clone().setY(1.7),
-    radius: 2.6,
+    radius:   2.5,
     data,
   };
 }
