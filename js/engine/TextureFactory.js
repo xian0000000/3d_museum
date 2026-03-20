@@ -519,4 +519,62 @@ export const TextureFactory = {
     }, 512, 1, 1);
   },
 
+  /**
+   * Placeholder untuk slot galeri foto saat PNG belum ada.
+   * Menampilkan nomor slot + ikon kamera + border emas.
+   * @param {number} idx – nomor slot (1-5)
+   */
+  galleryPlaceholder(idx) {
+    return makeTexture((ctx, S) => {
+      const H = S;
+      ctx.fillStyle = "#0e0c08";
+      ctx.fillRect(0, 0, S, H);
+
+      // Border emas
+      ctx.strokeStyle = "rgba(200,160,80,0.6)";
+      ctx.lineWidth = 6;
+      ctx.strokeRect(12, 12, S - 24, H - 24);
+      ctx.strokeStyle = "rgba(200,160,80,0.2)";
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(20, 20, S - 40, H - 40);
+
+      // Sudut ornamen
+      [[20,20],[S-20,20],[20,H-20],[S-20,H-20]].forEach(([cx,cy]) => {
+        const dx = cx < S/2 ? 1 : -1, dy = cy < H/2 ? 1 : -1;
+        ctx.strokeStyle = "rgba(200,160,80,0.8)"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+dx*20,cy); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx,cy+dy*20); ctx.stroke();
+      });
+
+      // Ikon kamera (garis)
+      const ccx = S/2, ccy = H * 0.42, cw = S*0.28, ch = S*0.20;
+      ctx.strokeStyle = "rgba(200,160,80,0.35)"; ctx.lineWidth = 2;
+      ctx.strokeRect(ccx - cw/2, ccy - ch/2, cw, ch);
+      // Lensa
+      ctx.beginPath(); ctx.arc(ccx, ccy, cw*0.28, 0, Math.PI*2);
+      ctx.stroke();
+      // Flash bump
+      const bx = ccx - cw*0.28, by = ccy - ch/2;
+      ctx.strokeRect(bx, by - ch*0.25, cw*0.2, ch*0.25);
+
+      // Nomor slot
+      ctx.fillStyle = "rgba(200,160,80,0.7)";
+      ctx.font = `bold ${S*0.10}px monospace`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("0" + idx, S/2, H * 0.70);
+
+      // Label
+      ctx.fillStyle = "rgba(200,160,80,0.35)";
+      ctx.font = `${S*0.045}px sans-serif`;
+      ctx.fillText("taruh gallery"+idx+".png", S/2, H * 0.84);
+
+      // Vignette
+      const vig = ctx.createRadialGradient(S/2,H/2,H*0.12,S/2,H/2,H*0.72);
+      vig.addColorStop(0,"rgba(0,0,0,0)");
+      vig.addColorStop(1,"rgba(0,0,0,0.50)");
+      ctx.fillStyle = vig; ctx.fillRect(0,0,S,H);
+    }, 256, 1, 1);
+  },
+
 };

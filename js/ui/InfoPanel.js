@@ -16,6 +16,7 @@ const EXHIBIT_STYLES = {
   isLifeDashboard: { tag:"Life Dashboard",   borderColor:"#a855f7", textColor:"#c084fc", showLink:true  },
   isGithub:    { tag:"GitHub",              borderColor:"#58a6ff", textColor:"#58a6ff", showLink:true  },
   isLinkedin:  { tag:"LinkedIn",            borderColor:"#0ea5e9", textColor:"#0ea5e9", showLink:true  },
+  isGallery:   { tag:"Galeri Foto",         borderColor:"#c8a050", textColor:"#e8c870", showLink:false },
   isMusic:     { tag:"Musik",               borderColor:"#c8a050", textColor:"#ffd060", showMusic:true },
 };
 

@@ -1,22 +1,25 @@
 /**
  * app.js — Entry point Museum 3D.
  *
- * ══════════════════════════════════════════════════════
- *  DENAH (top-view, z ke bawah = selatan)
- * ══════════════════════════════════════════════════════
+ * ══════════════════════════════════════════════════════════════
+ *  DENAH MUSEUM (top-view)
+ * ══════════════════════════════════════════════════════════════
  *
- *  z=-14  ╔══[P0]══[   P1   ]══[P2]══╗
- *         ║  Galeri Utara             ║
- *  z=-8   ║ P5 (Barat)   P3 (Timur)  ║
- *         ║   ◻ GitHub  LinkedIn ◻   ║  ← kubus kiri-utara & kanan-utara
- *  z=-0.5 ║       ◻ Music ♪          ║  ← kubus musik + visualizer
- *  z=+3   ║ P6 (Barat)   P4 (Timur)  ║
- *  z=+9   ║  [MAP]                   ║
- *  z=+11  ║     [WELCOME]            ║
- *  z=+14  ╚═[P7]════════════[P8]═════╝
+ *  z=-14  ╔══[P0]════[P1 BESAR]════[P2]══╗
+ *         ║       Galeri Utara            ║
+ *  z=-8   ║ P5:LifeDash   P3:LautanWaktu ║
+ *         ║  ◻GitHub   ◻LinkedIn         ║
+ *  z=-0.5 ║      ◻Music♪                 ║
+ *  z=+3   ║ P6:StatLab    P4:ApiJiwa     ║
+ *         ║                              ║
+ *  z=+7   ║ [MAP]   G1 G2 G3 ← galeri  ║  ← 3 bingkai kecil atas
+ *  z=+9   ║         G4 G5    ← galeri  ║  ← 2 bingkai kecil bawah
+ *  z=+11  ║    [WELCOME BOARD]          ║
+ *  z=+14  ╚═[P7:ChatOcean]══[P8:Perpus]╝
  *
- *  Kamera start: (0, 1.7, 10) menghadap +z (selatan)
- * ══════════════════════════════════════════════════════
+ *  G1-G5 = 5 bingkai galeri foto di dinding timur, zona selatan
+ *  Kamera start: (0, 1.7, 10) → menghadap ke selatan (+z)
+ * ══════════════════════════════════════════════════════════════
  */
 
 import { EXHIBITS }          from "./data/exhibits.js";
@@ -29,35 +32,61 @@ import { createMapBoard }    from "./engine/MapBoard.js";
 import { MusicVisualizer }   from "./engine/MusicVisualizer.js";
 import { InfoPanel }         from "./ui/InfoPanel.js";
 import { DragControls }      from "./ui/DragControls.js";
-import { runLoadingScreen } from "./ui/LoadingScreen.js";
+import { runLoadingScreen }  from "./ui/LoadingScreen.js";
 import { MusicPlayer }       from "./ui/MusicPlayer.js";
 
-// ── Konstanta layout ──────────────────────────────────────────
-const { W, D }  = ROOM;
-const FRAME_Y   = 2.65;
-const N_WALL_Z  = -(D/2) + 0.30;
-const S_WALL_Z  =  (D/2) - 0.30;
-const E_WALL_X  =  (W/2) - 0.30;
-const W_WALL_X  = -(W/2) + 0.30;
+// ─────────────────────────────────────────────────────────────
+//  KONSTANTA POSISI
+// ─────────────────────────────────────────────────────────────
+const { W, D }  = ROOM;                   // W=22, D=28
+const FRAME_Y   = 2.65;                   // eye-level bingkai standar
+const FRAME_Y_U = 3.30;                   // bingkai kecil baris atas
+const FRAME_Y_L = 1.90;                   // bingkai kecil baris bawah
+const N_WALL_Z  = -(D / 2) + 0.30;       // z = -13.70
+const S_WALL_Z  =  (D / 2) - 0.30;       // z = +13.70
+const E_WALL_X  =  (W / 2) - 0.30;       // x = +10.70
+const W_WALL_X  = -(W / 2) + 0.30;       // x = -10.70
 
-// ── Posisi lukisan ────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+//  LAYOUT LUKISAN
+//  idx = index di array paintings (filtered dari EXHIBITS)
+// ─────────────────────────────────────────────────────────────
 const PAINTING_LAYOUT = [
-  { idx:0, pos:[-5.5, FRAME_Y, N_WALL_Z], rotY:0,            w:3.0, h:2.2 },
-  { idx:1, pos:[   0, FRAME_Y, N_WALL_Z], rotY:0,            w:3.4, h:2.4 },
-  { idx:2, pos:[ 5.5, FRAME_Y, N_WALL_Z], rotY:0,            w:3.0, h:2.2 },
-  { idx:3, pos:[E_WALL_X, FRAME_Y, -8],   rotY:-Math.PI/2,   w:3.0, h:2.2 },
-  { idx:4, pos:[E_WALL_X, FRAME_Y,  3],   rotY:-Math.PI/2,   w:3.0, h:2.2 },
-  { idx:5, pos:[W_WALL_X, FRAME_Y, -8],   rotY: Math.PI/2,   w:3.0, h:2.2 },
-  { idx:6, pos:[W_WALL_X, FRAME_Y,  3],   rotY: Math.PI/2,   w:3.0, h:2.2 },
-  { idx:7, pos:[-5.5, FRAME_Y, S_WALL_Z], rotY:Math.PI,      w:3.0, h:2.2 },
-  { idx:8, pos:[ 5.5, FRAME_Y, S_WALL_Z], rotY:Math.PI,      w:3.0, h:2.2 },
+
+  // ── Dinding Utara ─────────────────────────────────────────
+  { idx: 0, pos: [-5.5, FRAME_Y, N_WALL_Z], rotY: 0,           w: 3.0, h: 2.2 },
+  { idx: 1, pos: [   0, FRAME_Y, N_WALL_Z], rotY: 0,           w: 3.4, h: 2.4 }, // tengah lebih besar
+  { idx: 2, pos: [ 5.5, FRAME_Y, N_WALL_Z], rotY: 0,           w: 3.0, h: 2.2 },
+
+  // ── Dinding Timur — zona utara ────────────────────────────
+  { idx: 3, pos: [E_WALL_X, FRAME_Y, -8],   rotY: -Math.PI/2,  w: 3.0, h: 2.2 },
+  { idx: 4, pos: [E_WALL_X, FRAME_Y,  3],   rotY: -Math.PI/2,  w: 3.0, h: 2.2 },
+
+  // ── Dinding Barat ─────────────────────────────────────────
+  { idx: 5, pos: [W_WALL_X, FRAME_Y, -8],   rotY:  Math.PI/2,  w: 3.0, h: 2.2 },
+  { idx: 6, pos: [W_WALL_X, FRAME_Y,  3],   rotY:  Math.PI/2,  w: 3.0, h: 2.2 },
+
+  // ── Dinding Selatan ───────────────────────────────────────
+  { idx: 7, pos: [-5.5, FRAME_Y, S_WALL_Z], rotY: Math.PI,     w: 3.0, h: 2.2 },
+  { idx: 8, pos: [ 5.5, FRAME_Y, S_WALL_Z], rotY: Math.PI,     w: 3.0, h: 2.2 },
+
+  // ── Galeri Foto — dinding Timur, zona selatan ─────────────
+  // 5 bingkai kecil: baris atas 3 buah, baris bawah 2 buah (rata tengah)
+  // Posisi Z: 7.5 / 9.5 / 11.5 (atas) dan 8.5 / 10.5 (bawah)
+  { idx:  9, pos: [E_WALL_X, FRAME_Y_U,  7.5], rotY: -Math.PI/2, w: 1.4, h: 1.0 },
+  { idx: 10, pos: [E_WALL_X, FRAME_Y_U,  9.5], rotY: -Math.PI/2, w: 1.4, h: 1.0 },
+  { idx: 11, pos: [E_WALL_X, FRAME_Y_U, 11.5], rotY: -Math.PI/2, w: 1.4, h: 1.0 },
+  { idx: 12, pos: [E_WALL_X, FRAME_Y_L,  8.5], rotY: -Math.PI/2, w: 1.4, h: 1.0 },
+  { idx: 13, pos: [E_WALL_X, FRAME_Y_L, 10.5], rotY: -Math.PI/2, w: 1.4, h: 1.0 },
 ];
 
-// ── Posisi patung / kubus ─────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+//  POSISI KUBUS / PATUNG
+// ─────────────────────────────────────────────────────────────
 const SCULPTURE_POSITIONS = [
-  new THREE.Vector3(-3.5, 0, -4.0),   // GitHub  (kiri-utara)
-  new THREE.Vector3( 3.5, 0, -4.0),   // LinkedIn (kanan-utara)
-  new THREE.Vector3(   0, 0, -0.5),   // Music   (tengah, paling menonjol)
+  new THREE.Vector3(-3.5, 0, -4.0),  // GitHub
+  new THREE.Vector3( 3.5, 0, -4.0),  // LinkedIn
+  new THREE.Vector3(   0, 0, -0.5),  // Music
 ];
 
 function getRoomLabel(z) {
@@ -66,19 +95,23 @@ function getRoomLabel(z) {
   return "Galeri Selatan — Proyek Digital";
 }
 
-// ── MuseumApp ─────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+//  MuseumApp
+// ─────────────────────────────────────────────────────────────
 class MuseumApp {
   constructor() {
-    this._exhibits   = [];
-    this._sculptures = [];
-    this._clock      = new THREE.Clock();
-    this._rlNameEl   = document.getElementById("rl-name");
-    this._musicViz   = null;
-    this._musicPlayer= null;
+    this._exhibits    = [];
+    this._sculptures  = [];
+    this._clock       = new THREE.Clock();
+    this._rlNameEl    = document.getElementById("rl-name");
+    this._musicViz    = null;
+    this._musicPlayer = null;
   }
 
   _initRenderer() {
-    this._renderer = new THREE.WebGLRenderer({ antialias:true, powerPreference:"high-performance" });
+    this._renderer = new THREE.WebGLRenderer({
+      antialias: true, powerPreference: "high-performance"
+    });
     this._renderer.setSize(innerWidth, innerHeight);
     this._renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
     this._renderer.outputEncoding = THREE.sRGBEncoding;
@@ -92,13 +125,13 @@ class MuseumApp {
   }
 
   _initCamera() {
-    this._camera = new THREE.PerspectiveCamera(68, innerWidth/innerHeight, 0.05, 60);
+    this._camera = new THREE.PerspectiveCamera(68, innerWidth / innerHeight, 0.05, 60);
     this._camera.position.set(0, 1.7, 10);
   }
 
   _initResize() {
     window.addEventListener("resize", () => {
-      this._camera.aspect = innerWidth/innerHeight;
+      this._camera.aspect = innerWidth / innerHeight;
       this._camera.updateProjectionMatrix();
       this._renderer.setSize(innerWidth, innerHeight);
     });
@@ -111,44 +144,40 @@ class MuseumApp {
 
     // Lukisan
     PAINTING_LAYOUT.forEach(({ idx, pos, rotY, w, h }) => {
-      const data = paintings[idx]; if (!data) return;
-      this._exhibits.push(createPainting(scene, data, new THREE.Vector3(...pos), rotY, w, h));
+      const data = paintings[idx];
+      if (!data) return;
+      this._exhibits.push(
+        createPainting(scene, data, new THREE.Vector3(...pos), rotY, w, h)
+      );
     });
 
-    // Papan sambutan & denah
-    createWelcomeBoard(scene, { x:0, z:11.5, rotY:Math.PI });
-    createMapBoard(scene, { x:W_WALL_X, y:FRAME_Y, z:9.0, rotY:Math.PI/2 });
+    // Papan sambutan (lobby selatan, hadap ke utara)
+    createWelcomeBoard(scene, { x: 0, z: 11.5, rotY: Math.PI });
 
-    // Patung / kubus
+    // Papan denah (dinding barat, zona selatan)
+    createMapBoard(scene, { x: W_WALL_X, y: FRAME_Y, z: 9.0, rotY: Math.PI / 2 });
+
+    // Kubus / patung
     sculptures.forEach((data, i) => {
       const ex = createSculpture(scene, data, SCULPTURE_POSITIONS[i]);
       this._exhibits.push(ex);
       this._sculptures.push(ex.mesh);
     });
 
-    // Music visualizer — posisi kubus musik (index 2)
+    // Music visualizer di posisi kubus musik
     this._musicViz = new MusicVisualizer(scene, SCULPTURE_POSITIONS[2]);
   }
 
   _initMusic() {
-    this._musicPlayer = new MusicPlayer(
-      "5uDY6hEYfPc",
-      "https://youtu.be/5uDY6hEYfPc?si=Z28WhXUv3kO9rSuO",
-    );
+    this._musicPlayer = new MusicPlayer("5uDY6hEYfPc");
 
     this._musicPlayer.onStateChange((playing) => {
-      // Kirim ke visualizer
       this._musicViz.setPlaying(playing);
-
-      // Update badge "Now Playing"
       const badge = document.getElementById("now-playing");
       if (badge) badge.style.display = playing ? "flex" : "none";
-
-      // Beritahu InfoPanel (untuk sync tombol)
-      document.dispatchEvent(new CustomEvent("museum:music-state", { detail:{ playing } }));
+      document.dispatchEvent(new CustomEvent("museum:music-state", { detail: { playing } }));
     });
 
-    // Tombol di InfoPanel minta toggle
     document.addEventListener("museum:music-toggle", () => {
       this._musicPlayer.toggle();
     });
@@ -159,7 +188,7 @@ class MuseumApp {
     const dismiss = () => hint.classList.add("off");
     document.getElementById("enter-btn").addEventListener("click", dismiss);
     this._renderer.domElement.addEventListener("mousedown",  dismiss);
-    this._renderer.domElement.addEventListener("touchstart", dismiss, { passive:true });
+    this._renderer.domElement.addEventListener("touchstart", dismiss, { passive: true });
   }
 
   _loop() {
@@ -171,14 +200,13 @@ class MuseumApp {
     this._rlNameEl.textContent = getRoomLabel(this._camera.position.z);
     this._infoPanel.update(this._camera.position, this._exhibits);
 
-    // Kubus berputar — multi-sumbu biar keren
+    // Kubus berputar multi-sumbu
     this._sculptures.forEach((mesh, i) => {
-      mesh.rotation.y += [0.008, 0.006, 0.010][i] || 0.007;
-      mesh.rotation.x += [0.003, 0.004, 0.002][i] || 0.003;
-      mesh.position.y = 1.65 + Math.sin(t * [0.85, 0.75, 0.70][i] + i * 1.5) * 0.055;
+      mesh.rotation.y += [0.008, 0.006, 0.010][i];
+      mesh.rotation.x += [0.003, 0.004, 0.002][i];
+      mesh.position.y  = 1.65 + Math.sin(t * [0.85, 0.75, 0.70][i] + i * 1.5) * 0.055;
     });
 
-    // Music visualizer
     if (this._musicViz) this._musicViz.update(t);
 
     this._renderer.render(this._scene, this._camera);
