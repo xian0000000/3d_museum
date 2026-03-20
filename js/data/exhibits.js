@@ -73,27 +73,27 @@ export const EXHIBITS = [
   // ── [9-13] Galeri Foto — dinding timur zona selatan ────────
   // Ganti title/desc sesuai isi foto kamu!
   // File PNG: gallery1.png s/d gallery5.png (taruh di root bersama index.html)
-  { type:"painting", title:"Galeri I",       artist:"Otong Shippuden",         year:"2026",
+  { type:"painting", title:"Galeri — I",       artist:"Otong Shippuden",         year:"2026",
     desc:"Koleksi foto pribadi.",
     colors:["#0a0a0a","#1a1a1a","#888","#aaa"],
     png:"gallery1.png", isGallery:true, galleryIdx:1 },
 
-  { type:"painting", title:"Galeri II",      artist:"Otong Shippuden",         year:"2026",
+  { type:"painting", title:"Galeri — II",      artist:"Otong Shippuden",         year:"2026",
     desc:"Koleksi foto pribadi.",
     colors:["#0a0a0a","#1a1a1a","#888","#aaa"],
     png:"gallery2.png", isGallery:true, galleryIdx:2 },
 
-  { type:"painting", title:"Galeri III",     artist:"Otong Shippuden",         year:"2026",
+  { type:"painting", title:"Galeri — III",     artist:"Otong Shippuden",         year:"2026",
     desc:"Koleksi foto pribadi.",
     colors:["#0a0a0a","#1a1a1a","#888","#aaa"],
     png:"gallery3.png", isGallery:true, galleryIdx:3 },
 
-  { type:"painting", title:"Galeri IV",      artist:"Otong Shippuden",         year:"2026",
+  { type:"painting", title:"Galeri — IV",      artist:"Otong Shippuden",         year:"2026",
     desc:"Koleksi foto pribadi.",
     colors:["#0a0a0a","#1a1a1a","#888","#aaa"],
     png:"gallery4.png", isGallery:true, galleryIdx:4 },
 
-  { type:"painting", title:"Galeri V",       artist:"Otong Shippuden",         year:"2026",
+  { type:"painting", title:"Galeri — V",       artist:"Otong Shippuden",         year:"2026",
     desc:"Koleksi foto pribadi.",
     colors:["#0a0a0a","#1a1a1a","#888","#aaa"],
     png:"gallery5.png", isGallery:true, galleryIdx:5 },

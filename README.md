@@ -6,6 +6,8 @@
 
 ## 📸 Preview
 
+https://xian0000000.github.io/3d_museum/ <-- Deploy
+
 ### Denah Lantai (Floor Plan)
 
 ![Floor Plan](./screenshots/floorplan.svg)
