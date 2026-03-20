@@ -31,9 +31,10 @@ export const EXHIBITS = [
     desc:"Energi kehidupan yang berpijar — palet warna panas meledak dalam satu momen abadi.",
     colors:["#2a0800","#a01808","#e05010","#f0a020"] },
 
-  { type:"painting", title:"Batas Langit",      artist:"Yusuf Hakim",  year:"2023",
-    desc:"Panorama abstrak tentang horizon dan kemungkinan tak terbatas.",
-    colors:["#080015","#301880","#6040c0","#c0a0ff"] },
+  { type:"painting", title:"Life Dashboard",     artist:"Xina",         year:"2026",
+    desc:"Dashboard kehidupan interaktif — pantau kebiasaan, target, dan progres harianmu. Klik untuk membuka.",
+    colors:["#0a0f1e","#0d2137","#7c3aed","#a855f7"],
+    url:"https://xian0000000.github.io/life_dashboard/", isLifeDashboard:true },
 
   { type:"painting", title:"StatLab",           artist:"Xina",         year:"2026",
     desc:"Platform analisis statistik interaktif — riset, lab, dan keuangan. Klik untuk membuka.",
@@ -53,7 +54,7 @@ export const EXHIBITS = [
   // ── Patung (kubus 3D) ──────────────────────────────────────────
   { type:"sculpture", title:"GitHub",
     artist:"Xina", year:"2026",
-    desc:"Lihat semua proyek xina atau Kunjungi profil GitHub.",
+    desc:"Lihat semua proyek dan kontribusi open source. Kunjungi profil GitHub.",
     icon:"</>", bg:"#0d1117", accent:"#58a6ff",
     url:"https://github.com/xian0000000",
     isGithub:true },
@@ -67,7 +68,7 @@ export const EXHIBITS = [
 
   { type:"sculpture", title:"Music",
     artist:"Xina", year:"2026",
-    desc:"Putar musik museum dan nikmati nuansa museum bertema mesir.",
+    desc:"Putar musik museum dan nikmati visualizer audio 3D yang mengelilingi patung.",
     icon:"\u266a", bg:"#0e0a04", accent:"#c8a050",
     videoId:"5uDY6hEYfPc",
     url:"https://youtu.be/5uDY6hEYfPc?si=Z28WhXUv3kO9rSuO",

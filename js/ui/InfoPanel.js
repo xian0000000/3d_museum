@@ -13,6 +13,7 @@ const EXHIBIT_STYLES = {
   isStatistic: { tag:"StatLab",            borderColor:"#00e5c8", textColor:"#00e5c8", showLink:true  },
   isChatOcean: { tag:"Chat Ocean",          borderColor:"#007bff", textColor:"#4da6ff", showLink:true  },
   isLibrary:   { tag:"Perpustakaan Kuno",   borderColor:"#2d6abf", textColor:"#7eb8f7", showLink:true  },
+  isLifeDashboard: { tag:"Life Dashboard",   borderColor:"#a855f7", textColor:"#c084fc", showLink:true  },
   isGithub:    { tag:"GitHub",              borderColor:"#58a6ff", textColor:"#58a6ff", showLink:true  },
   isLinkedin:  { tag:"LinkedIn",            borderColor:"#0ea5e9", textColor:"#0ea5e9", showLink:true  },
   isMusic:     { tag:"Musik",               borderColor:"#c8a050", textColor:"#ffd060", showMusic:true },

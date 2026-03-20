@@ -373,4 +373,150 @@ export const TextureFactory = {
     return t;
   },
 
+  /** Life Dashboard — progress rings + habit grid + sparkline */
+  lifeDashboard() {
+    return makeTexture((ctx, S) => {
+      const H = S * 0.82;
+
+      // Background gelap ungu
+      ctx.fillStyle = "#0a0f1e";
+      ctx.fillRect(0, 0, S, H);
+
+      // Grid dots subtle
+      ctx.fillStyle = "rgba(124,58,237,0.10)";
+      for (let x = 16; x < S; x += 22) {
+        for (let y = 16; y < H; y += 22) {
+          ctx.beginPath(); ctx.arc(x, y, 1.2, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+
+      // ── Progress rings (kiri) ─────────────────────────────
+      const rings = [
+        { pct: 0.78, color: "#a855f7", label: "Habit", r: 54 },
+        { pct: 0.62, color: "#06b6d4", label: "Sleep", r: 38 },
+        { pct: 0.91, color: "#10b981", label: "Goal",  r: 22 },
+      ];
+      const rcx = S * 0.28, rcy = H * 0.42;
+
+      rings.forEach(({ pct, color, r }) => {
+        // Track
+        ctx.beginPath();
+        ctx.arc(rcx, rcy, r, 0, Math.PI * 2);
+        ctx.strokeStyle = color + "22";
+        ctx.lineWidth = 6;
+        ctx.stroke();
+        // Fill arc
+        ctx.beginPath();
+        ctx.arc(rcx, rcy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * pct);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 6;
+        ctx.lineCap = "round";
+        ctx.stroke();
+      });
+
+      // Center text
+      ctx.fillStyle = "#e2e8f0";
+      ctx.font = `bold ${S * 0.075}px monospace`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("78%", rcx, rcy);
+      ctx.fillStyle = "rgba(200,200,220,0.45)";
+      ctx.font = `${S * 0.038}px sans-serif`;
+      ctx.fillText("today", rcx, rcy + S * 0.065);
+
+      // ── Habit grid (kanan atas) ──────────────────────────
+      const gx = S * 0.54, gy = H * 0.10;
+      const cols = 10, rows = 5, cell = 14, gap = 4;
+      const filled = [1,1,0,1,1,1,0,1,1,0, 1,0,1,1,1,0,1,1,0,1,
+                       1,1,1,0,1,1,1,0,1,1, 0,1,1,1,0,1,1,1,1,0,
+                       1,1,0,1,1,1,0,1,1,1];
+      for (let r = 0; r < rows; r++) {
+        for (let co = 0; co < cols; co++) {
+          const i = r * cols + co;
+          ctx.fillStyle = filled[i]
+            ? `rgba(168,85,247,${0.45 + (filled[i] * 0.45)})`
+            : "rgba(124,58,237,0.12)";
+          const rx = gx + co * (cell + gap);
+          const ry = gy + r  * (cell + gap);
+          ctx.fillRect(rx, ry, cell, cell);
+        }
+      }
+      ctx.fillStyle = "rgba(200,180,255,0.5)";
+      ctx.font = `${S * 0.038}px sans-serif`;
+      ctx.textAlign = "left";
+      ctx.fillText("Habits  ·  50/50", gx, gy - 8);
+
+      // ── Sparkline (bawah kanan) ──────────────────────────
+      const sx = S * 0.52, sy = H * 0.62, sw = S * 0.42, sh = H * 0.22;
+      const pts = [0.4,0.55,0.48,0.72,0.65,0.80,0.68,0.75,0.88,0.82,0.91];
+      ctx.fillStyle = "rgba(16,185,129,0.08)";
+      ctx.beginPath();
+      ctx.moveTo(sx, sy + sh);
+      pts.forEach((v, i) => {
+        ctx.lineTo(sx + (i / (pts.length - 1)) * sw, sy + sh * (1 - v));
+      });
+      ctx.lineTo(sx + sw, sy + sh);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      pts.forEach((v, i) => {
+        const px = sx + (i / (pts.length - 1)) * sw;
+        const py = sy + sh * (1 - v);
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      });
+      ctx.strokeStyle = "#10b981";
+      ctx.lineWidth = 2.5;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.stroke();
+      // Last point dot
+      const lx = sx + sw, ly = sy + sh * (1 - pts[pts.length - 1]);
+      ctx.beginPath(); ctx.arc(lx, ly, 4, 0, Math.PI * 2);
+      ctx.fillStyle = "#10b981"; ctx.fill();
+
+      ctx.fillStyle = "rgba(200,255,220,0.45)";
+      ctx.font = `${S * 0.038}px sans-serif`;
+      ctx.textAlign = "left";
+      ctx.fillText("Progress  ·  7 days", sx, sy - 8);
+
+      // ── Stats row ────────────────────────────────────────
+      const stats = [
+        { val: "12", lbl: "Habits" },
+        { val: "7h", lbl: "Sleep"  },
+        { val: "3",  lbl: "Tasks"  },
+      ];
+      stats.forEach(({ val, lbl }, i) => {
+        const bx = S * (0.10 + i * 0.30), by = H * 0.78;
+        ctx.fillStyle = "rgba(124,58,237,0.18)";
+        ctx.fillRect(bx, by, S*0.24, S*0.10);
+        ctx.fillStyle = "#c084fc";
+        ctx.font = `bold ${S * 0.068}px monospace`;
+        ctx.textAlign = "center";
+        ctx.fillText(val, bx + S*0.12, by + S*0.07);
+        ctx.fillStyle = "rgba(200,180,255,0.45)";
+        ctx.font = `${S * 0.032}px sans-serif`;
+        ctx.fillText(lbl, bx + S*0.12, by + S*0.095);
+      });
+
+      // ── Judul ─────────────────────────────────────────────
+      ctx.fillStyle = "#a855f7";
+      ctx.font = `bold ${S * 0.082}px monospace`;
+      ctx.textAlign = "center";
+      ctx.shadowColor = "rgba(168,85,247,0.4)";
+      ctx.shadowBlur = 10;
+      ctx.fillText("LIFE", S / 2, H * 0.096);
+      ctx.fillStyle = "#c084fc";
+      ctx.font = `bold ${S * 0.060}px monospace`;
+      ctx.fillText("DASHBOARD", S / 2, H * 0.160);
+      ctx.shadowBlur = 0;
+
+      // Vignette
+      const vig = ctx.createRadialGradient(S/2,H/2,H*0.1,S/2,H/2,H*0.78);
+      vig.addColorStop(0,"rgba(0,0,0,0)");
+      vig.addColorStop(1,"rgba(0,0,0,0.40)");
+      ctx.fillStyle = vig; ctx.fillRect(0,0,S,H);
+
+    }, 512, 1, 1);
+  },
+
 };

@@ -21,7 +21,7 @@ const BOARD_TEXT = {
   tagline:   "Galeri Seni Digital Interaktif",
   divider:   "✦  ✦  ✦",
   body: [
-    "Jelajahi koleksi lukisan dan ",
+    "Jelajahi koleksi lukisan dan patung",
     "dalam ruang tiga dimensi.",
   ],
   controls: "W A S D  ·  DRAG MOUSE  ·  SENTUH LAYAR",

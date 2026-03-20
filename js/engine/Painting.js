@@ -37,7 +37,9 @@ export function createPainting(scene, data, pos, rotY, w = 3.2, h = 2.2) {
 
   // ── Pilih tekstur ────────────────────────────────────────────
   let tex;
-  if (data.isStatistic) {
+  if (data.isLifeDashboard) {
+    tex = TextureFactory.lifeDashboard();
+  } else if (data.isStatistic) {
     tex = TextureFactory.statistic();
   } else if (data.isLibrary) {
     tex = new THREE.TextureLoader().load(
