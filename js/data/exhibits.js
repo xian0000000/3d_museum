@@ -23,9 +23,11 @@
 export const EXHIBITS = [
 
   // ── [0-2] Dinding Utara ────────────────────────────────────
-  { type:"painting", title:"Harmoni Cahaya",   artist:"Rina Dewanto", year:"2021",
-    desc:"Ekspresi abstrak tentang perjalanan waktu melalui gelombang warna yang saling berpadu.",
-    colors:["#0e2a4a","#1a6090","#e87820","#f0a030"] },
+  { type:"painting", title:"Mobil Radar Pendeteksi Suhu", artist:"Xina", year:"2026",
+    desc:"Proyek Arduino: mobil pintar berbasis sensor ultrasonik & suhu DHT. Deteksi objek + monitoring suhu real-time via Tinkercad. Klik untuk membuka.",
+    colors:["#0a1a0a","#003300","#00aa44","#00ff88"],
+    url:"https://www.tinkercad.com/things/1881v69jM2t-xina-mobil-radar-pendeteksi-suhu?sharecode=3UZy7Uh6HRltGEn634fOgAN3Io0y6fuSHZzWQ2jSLDw",
+    png:"arduino.png", isArduino:true },
 
   { type:"painting", title:"Kota Imajiner",    artist:"Bima Santoso", year:"2019",
     desc:"Karya geometris menggambarkan kompleksitas kehidupan urban — kaca, baja, dan cahaya neon.",

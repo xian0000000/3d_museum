@@ -10,6 +10,7 @@
  */
 
 const EXHIBIT_STYLES = {
+  isArduino:   { tag:"Arduino Project",        borderColor:"#00ff88", textColor:"#00cc66", showLink:true  },
   isStatistic: { tag:"StatLab",            borderColor:"#00e5c8", textColor:"#00e5c8", showLink:true  },
   isChatOcean: { tag:"Chat Ocean",          borderColor:"#007bff", textColor:"#4da6ff", showLink:true  },
   isLibrary:   { tag:"Perpustakaan Kuno",   borderColor:"#2d6abf", textColor:"#7eb8f7", showLink:true  },
