@@ -20,6 +20,7 @@ import { TextureFactory } from "./TextureFactory.js";
  * Key = nama property di data exhibit.
  */
 const FALLBACK_FN = {
+  isCuaca:         (data) => TextureFactory.painting(data.colors),
   isArduino:       (data) => TextureFactory.painting(data.colors),
   isLifeDashboard: () => TextureFactory.lifeDashboard(),
   isStatistic:     () => TextureFactory.statistic(),

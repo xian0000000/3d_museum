@@ -29,9 +29,11 @@ export const EXHIBITS = [
     url:"https://www.tinkercad.com/things/1881v69jM2t-xina-mobil-radar-pendeteksi-suhu?sharecode=3UZy7Uh6HRltGEn634fOgAN3Io0y6fuSHZzWQ2jSLDw",
     png:"arduino.png", isArduino:true },
 
-  { type:"painting", title:"Kota Imajiner",    artist:"Bima Santoso", year:"2019",
-    desc:"Karya geometris menggambarkan kompleksitas kehidupan urban — kaca, baja, dan cahaya neon.",
-    colors:["#120820","#602080","#c040a0","#40c0e0"] },
+  { type:"painting", title:"Perkiraan Cuaca Bekasi", artist:"Xina", year:"2026",
+    desc:"Aplikasi cuaca real-time untuk Kota Bekasi — tampilkan suhu, kelembaban, dan prakiraan harian. Klik untuk membuka.",
+    colors:["#0a1628","#1a3a6b","#38bdf8","#7dd3fc"],
+    url:"https://perkiraan-cuaca-fz9l9cq8p-xian0000000s-projects.vercel.app/",
+    png:"cuaca.png", isCuaca:true },
 
   { type:"painting", title:"Hutan Mimpi",      artist:"Laras Utami",  year:"2020",
     desc:"Interpretasi organis dari alam liar melalui sapuan warna hijau yang bebas dan energik.",
