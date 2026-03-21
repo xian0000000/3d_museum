@@ -21,6 +21,7 @@ import { TextureFactory } from "./TextureFactory.js";
  */
 const FALLBACK_FN = {
   isCuaca:         (data) => TextureFactory.painting(data.colors),
+  isDetektif:      (data) => TextureFactory.painting(data.colors),
   isArduino:       (data) => TextureFactory.painting(data.colors),
   isLifeDashboard: () => TextureFactory.lifeDashboard(),
   isStatistic:     () => TextureFactory.statistic(),

@@ -7,15 +7,15 @@
  *
  *  z=-14  ╔══[P0]════[P1 BESAR]════[P2]══╗
  *         ║       Galeri Utara            ║
- *  z=-8   ║ P5:LifeDash   P3:LautanWaktu ║
+ *  z=-8   ║ (kosong)      P3:ChatOcean   ║
  *         ║  ◻GitHub   ◻LinkedIn         ║
  *  z=-0.5 ║      ◻Music♪                 ║
- *  z=+3   ║ P6:StatLab    P4:ApiJiwa     ║
+ *  z=+3   ║ (kosong)      P4:Perpus      ║
  *         ║                              ║
  *  z=+7   ║ [MAP]   G1 G2 G3 ← galeri  ║  ← 3 bingkai kecil atas
  *  z=+9   ║         G4 G5    ← galeri  ║  ← 2 bingkai kecil bawah
  *  z=+11  ║    [WELCOME BOARD]          ║
- *  z=+14  ╚═[P7:ChatOcean]══[P8:Perpus]╝
+ *  z=+14  ╚═[P5:LifeDash]══[P6:StatLab]╝
  *
  *  G1-G5 = 5 bingkai galeri foto di dinding timur, zona selatan
  *  Kamera start: (0, 1.7, 10) → menghadap ke selatan (+z)
@@ -67,8 +67,7 @@ const PAINTING_LAYOUT = [
   { idx: 6, pos: [W_WALL_X, FRAME_Y,  3],   rotY:  Math.PI/2,  w: 3.0, h: 2.2 },
 
   // ── Dinding Selatan ───────────────────────────────────────
-  { idx: 7, pos: [-5.5, FRAME_Y, S_WALL_Z], rotY: Math.PI,     w: 3.0, h: 2.2 },
-  { idx: 8, pos: [ 5.5, FRAME_Y, S_WALL_Z], rotY: Math.PI,     w: 3.0, h: 2.2 },
+  // (kosong — akan diisi nanti)
 
   // ── Galeri Foto — dinding Timur, zona selatan ─────────────
   // 5 bingkai kecil: baris atas 3 buah, baris bawah 2 buah (rata tengah)

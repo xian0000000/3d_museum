@@ -35,33 +35,13 @@ export const EXHIBITS = [
     url:"https://perkiraan-cuaca-fz9l9cq8p-xian0000000s-projects.vercel.app/",
     png:"cuaca.png", isCuaca:true },
 
-  { type:"painting", title:"Hutan Mimpi",      artist:"Laras Utami",  year:"2020",
-    desc:"Interpretasi organis dari alam liar melalui sapuan warna hijau yang bebas dan energik.",
-    colors:["#081a10","#1a5830","#40a050","#90d840"] },
+  { type:"painting", title:"Detektif Produktivitas", artist:"Xina", year:"2026",
+    desc:"Lacak dan analisis produktivitasmu layaknya seorang detektif — temukan kebiasaan tersembunyi, pecahkan kasus prokrastinasi. Klik untuk membuka.",
+    colors:["#0d0d0d","#1a1a2e","#c8a050","#f0d080"],
+    url:"https://detektif-production.up.railway.app/",
+    png:"detektif.png", isDetektif:true },
 
   // ── [3-4] Dinding Timur ────────────────────────────────────
-  { type:"painting", title:"Lautan Waktu",     artist:"Farhan Rizki", year:"2018",
-    desc:"Meditasi visual tentang kedalaman samudra sebagai metafora perjalanan jiwa.",
-    colors:["#040c1c","#082050","#1060a0","#30b0e0"] },
-
-  { type:"painting", title:"Api Jiwa",         artist:"Rina Dewanto", year:"2022",
-    desc:"Energi kehidupan yang berpijar — palet warna panas meledak dalam satu momen abadi.",
-    colors:["#2a0800","#a01808","#e05010","#f0a020"] },
-
-  // ── [5-6] Dinding Barat ────────────────────────────────────
-  { type:"painting", title:"Life Dashboard",   artist:"Xina",         year:"2026",
-    desc:"Dashboard kehidupan interaktif — pantau kebiasaan, target, dan progres harianmu. Klik untuk membuka.",
-    colors:["#0a0f1e","#0d2137","#7c3aed","#a855f7"],
-    url:"https://xian0000000.github.io/life_dashboard/",
-    png:"lifedashboard.png", isLifeDashboard:true },
-
-  { type:"painting", title:"StatLab",          artist:"Xina",         year:"2026",
-    desc:"Platform analisis statistik interaktif — riset, lab, dan keuangan. Klik untuk membuka.",
-    colors:["#0a1628","#0d2137","#00e5c8","#00aaf5"],
-    url:"https://xian0000000.github.io/statistic/",
-    png:"statlab.png", isStatistic:true },
-
-  // ── [7-8] Dinding Selatan ──────────────────────────────────
   { type:"painting", title:"Chat Ocean",       artist:"Xina",         year:"2026",
     desc:"Platform obrolan inovatif berbasis web. Klik tombol untuk mengunjungi.",
     colors:["#007bff","#0056b3","#003366","#001133"],
@@ -73,6 +53,22 @@ export const EXHIBITS = [
     colors:["#0a1628","#1a3a6b","#2d6abf","#7eb8f7"],
     url:"https://frontend-production-ac9a.up.railway.app/",
     png:"perpuskuno.png", isLibrary:true },
+
+  // ── [5-6] Dinding Barat ────────────────────────────────────
+  // (dihapus — tidak ada bingkai di dinding barat)
+
+  // ── [7-8] Dinding Selatan ──────────────────────────────────
+  { type:"painting", title:"Life Dashboard",   artist:"Xina",         year:"2026",
+    desc:"Dashboard kehidupan interaktif — pantau kebiasaan, target, dan progres harianmu. Klik untuk membuka.",
+    colors:["#0a0f1e","#0d2137","#7c3aed","#a855f7"],
+    url:"https://xian0000000.github.io/life_dashboard/",
+    png:"lifedashboard.png", isLifeDashboard:true },
+
+  { type:"painting", title:"StatLab",          artist:"Xina",         year:"2026",
+    desc:"Platform analisis statistik interaktif — riset, lab, dan keuangan. Klik untuk membuka.",
+    colors:["#0a1628","#0d2137","#00e5c8","#00aaf5"],
+    url:"https://xian0000000.github.io/statistic/",
+    png:"statlab.png", isStatistic:true },
 
   // ── [9-13] Galeri Foto — dinding timur zona selatan ────────
   // Ganti title/desc sesuai isi foto kamu!

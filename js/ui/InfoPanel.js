@@ -11,6 +11,7 @@
 
 const EXHIBIT_STYLES = {
   isCuaca:     { tag:"Cuaca Bekasi",           borderColor:"#38bdf8", textColor:"#7dd3fc", showLink:true  },
+  isDetektif:  { tag:"Detektif Produktivitas", borderColor:"#e8b84b", textColor:"#f5d278", showLink:true  },
   isArduino:   { tag:"Arduino Project",        borderColor:"#00ff88", textColor:"#00cc66", showLink:true  },
   isStatistic: { tag:"StatLab",            borderColor:"#00e5c8", textColor:"#00e5c8", showLink:true  },
   isChatOcean: { tag:"Chat Ocean",          borderColor:"#007bff", textColor:"#4da6ff", showLink:true  },
