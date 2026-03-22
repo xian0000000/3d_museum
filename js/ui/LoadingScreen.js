@@ -36,6 +36,8 @@ export function runLoadingScreen() {
 
       if (progress >= 100) {
         clearInterval(tick);
+        fill.style.width = "100%";
+        label.textContent = "Siap masuk…";
         setTimeout(() => {
           screen.style.opacity = "0";
           setTimeout(() => {
@@ -45,5 +47,32 @@ export function runLoadingScreen() {
         }, 300);
       }
     }, 160);
+  });
+}
+
+/**
+ * Pre-warm renderer — render beberapa frame tersembunyi agar semua
+ * shader & texture sudah ter-compile di GPU sebelum user masuk.
+ * Panggil SEBELUM runLoadingScreen() resolve.
+ *
+ * @param {THREE.WebGLRenderer} renderer
+ * @param {THREE.Scene}         scene
+ * @param {THREE.Camera}        camera
+ * @param {number}              frames  jumlah frame pre-warm (default 10)
+ */
+export function preWarmRenderer(renderer, scene, camera, frames = 10) {
+  // Compile semua shader & upload texture ke GPU
+  renderer.compile(scene, camera);
+
+  // Render beberapa frame agar GPU warm-up
+  return new Promise((resolve) => {
+    let count = 0;
+    function warmFrame() {
+      renderer.render(scene, camera);
+      count++;
+      if (count < frames) requestAnimationFrame(warmFrame);
+      else resolve();
+    }
+    requestAnimationFrame(warmFrame);
   });
 }

@@ -30,25 +30,19 @@ export function buildLighting(scene) {
     scene.add(bulb);
   }
 
-  // ── Galeri Utara — 4 lampu (2 baris × 2 kolom) ───────────────
-  [[-5.5, -11], [5.5, -11],
-   [-5.5, -7 ], [5.5, -7 ]
-  ].forEach(([x, z]) => addCeilingLight(x, z, 0.52, 0xfff2d0, 12));
+  // ── Galeri Utara — 2 lampu radius besar ──────────────────
+  [[-3, -10], [3, -10],
+  ].forEach(([x, z]) => addCeilingLight(x, z, 0.65, 0xfff2d0, 18));
 
-  // ── Aula Tengah — 4 lampu simetris mengelilingi patung ────────
-  [[-5.5, -3], [5.5, -3],
-   [-5.5,  3], [5.5,  3]
-  ].forEach(([x, z]) => addCeilingLight(x, z, 0.45, 0xffe8c0, 13));
+  // ── Aula Tengah — 2 lampu ────────────────────────────────
+  [[-3, -1], [3, -1],
+  ].forEach(([x, z]) => addCeilingLight(x, z, 0.55, 0xffe8c0, 18));
 
-  // ── Galeri Selatan — 4 lampu (termasuk area lobby) ───────────
-  [[-5.5,  8], [5.5,  8],
-   [-5.5, 11], [5.5, 11]
-  ].forEach(([x, z]) => addCeilingLight(x, z, 0.48, 0xffeedd, 13));
+  // ── Galeri Selatan — 2 lampu ─────────────────────────────
+  [[-3, 9], [3, 9],
+  ].forEach(([x, z]) => addCeilingLight(x, z, 0.55, 0xffeedd, 18));
 
-  // ── Lampu pojok — mengisi area gelap di sisi timur/barat ──────
-  [
-    [-9.5, -10, 0.3], [9.5, -10, 0.3],
-    [-9.5,   0, 0.3], [9.5,   0, 0.3],
-    [-9.5,  10, 0.3], [9.5,  10, 0.3],
-  ].forEach(([x, z, i]) => addCeilingLight(x, z, i, 0xffeedd, 10));
+  // ── Lampu pojok kiri & kanan tengah ──────────────────────
+  [[-9.5, 0, 0.35], [9.5, 0, 0.35],
+  ].forEach(([x, z, i]) => addCeilingLight(x, z, i, 0xffeedd, 14));
 }

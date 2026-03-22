@@ -32,7 +32,7 @@ import { createMapBoard }    from "./engine/MapBoard.js";
 import { MusicVisualizer }   from "./engine/MusicVisualizer.js";
 import { InfoPanel }         from "./ui/InfoPanel.js";
 import { DragControls }      from "./ui/DragControls.js";
-import { runLoadingScreen }  from "./ui/LoadingScreen.js";
+import { runLoadingScreen, preWarmRenderer }  from "./ui/LoadingScreen.js";
 import { MusicPlayer }       from "./ui/MusicPlayer.js";
 
 // ─────────────────────────────────────────────────────────────
@@ -86,6 +86,8 @@ const SCULPTURE_POSITIONS = [
   new THREE.Vector3(-3.5, 0, -4.0),  // GitHub
   new THREE.Vector3( 3.5, 0, -4.0),  // LinkedIn
   new THREE.Vector3(   0, 0, -0.5),  // Music
+  new THREE.Vector3(-5.0, 0, 11.0),  // Availability
+  new THREE.Vector3( 5.0, 0, 11.0),  // Tech Stack
 ];
 
 function getRoomLabel(z) {
@@ -108,11 +110,16 @@ class MuseumApp {
   }
 
   _initRenderer() {
+    const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
+
     this._renderer = new THREE.WebGLRenderer({
-      antialias: true, powerPreference: "high-performance"
+      antialias: !isMobile,
+      powerPreference: "high-performance",
+      precision: isMobile ? "mediump" : "highp",
     });
     this._renderer.setSize(innerWidth, innerHeight);
-    this._renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+    // Mobile: cap pixel ratio di 1 agar tidak render resolusi terlalu tinggi
+    this._renderer.setPixelRatio(isMobile ? Math.min(devicePixelRatio, 1) : Math.min(devicePixelRatio, 1.5));
     this._renderer.outputEncoding = THREE.sRGBEncoding;
     document.body.appendChild(this._renderer.domElement);
   }
@@ -184,7 +191,7 @@ class MuseumApp {
 
   _initHint() {
     const hint    = document.getElementById("hint");
-    const dismiss = () => hint.classList.add("off");
+    const dismiss = () => { hint.classList.add("off"); };
     document.getElementById("enter-btn").addEventListener("click", dismiss);
     this._renderer.domElement.addEventListener("mousedown",  dismiss);
     this._renderer.domElement.addEventListener("touchstart", dismiss, { passive: true });
@@ -199,11 +206,14 @@ class MuseumApp {
     this._rlNameEl.textContent = getRoomLabel(this._camera.position.z);
     this._infoPanel.update(this._camera.position, this._exhibits);
 
-    // Kubus berputar multi-sumbu
+    // Kubus berputar multi-sumbu (dinamis untuk semua patung)
+    const rotY = [0.008, 0.006, 0.010, 0.007, 0.009];
+    const rotX = [0.003, 0.004, 0.002, 0.004, 0.003];
+    const bobF = [0.85,  0.75,  0.70,  0.80,  0.78 ];
     this._sculptures.forEach((mesh, i) => {
-      mesh.rotation.y += [0.008, 0.006, 0.010][i];
-      mesh.rotation.x += [0.003, 0.004, 0.002][i];
-      mesh.position.y  = 1.65 + Math.sin(t * [0.85, 0.75, 0.70][i] + i * 1.5) * 0.055;
+      mesh.rotation.y += rotY[i] ?? 0.008;
+      mesh.rotation.x += rotX[i] ?? 0.003;
+      mesh.position.y  = 1.65 + Math.sin(t * (bobF[i] ?? 0.80) + i * 1.5) * 0.055;
     });
 
     if (this._musicViz) this._musicViz.update(t);
@@ -226,6 +236,9 @@ class MuseumApp {
     this._controls  = new DragControls(this._camera, this._renderer.domElement, ROOM);
 
     this._initHint();
+
+    // Pre-warm: compile shader & upload texture ke GPU sebelum user masuk
+    await preWarmRenderer(this._renderer, this._scene, this._camera);
     await runLoadingScreen();
     this._loop();
   }

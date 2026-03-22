@@ -168,7 +168,49 @@ canvas.dragging {
 }
 
 
-/* ── 4. HUD Elements ──────────────────────────────────────────────────────── */
+/* ── Cable Hint ───────────────────────────────────────────────────────────── */
+
+#cable-hint {
+  position: fixed;
+  bottom: 2.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(8, 6, 4, 0.78);
+  border: 1px solid #3a2e18;
+  padding: 0.55rem 1.2rem;
+  border-radius: 2px;
+  z-index: 90;
+  animation: ch-fadein 0.6s ease forwards, ch-fadeout 0.6s ease 4.4s forwards;
+  pointer-events: none;
+}
+
+.ch-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.ch-text {
+  color: #8a7050;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-family: Georgia, serif;
+}
+
+@keyframes ch-fadein {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0);   }
+}
+
+@keyframes ch-fadeout {
+  from { opacity: 1; }
+  to   { opacity: 0; pointer-events: none; }
+}
+
+
 
 /* Crosshair */
 #xhair {
@@ -426,6 +468,52 @@ canvas.dragging {
 @media (pointer: coarse) {
   .hud-touch   { display: inline; }
   .hud-desktop { display: none; }
+}
+
+/* ── Landscape hint — hanya di HP (pointer: coarse) ─────────────────────── */
+
+#landscape-hint {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  #landscape-hint {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 14px auto 4px;
+    padding: 10px 16px;
+    background: rgba(200, 160, 80, 0.12);
+    border: 1px solid rgba(200, 160, 80, 0.45);
+    border-radius: 10px;
+    max-width: 280px;
+    animation: pulse-hint 2s ease-in-out infinite;
+  }
+  .lh-icon {
+    font-size: 1.6rem;
+    animation: spin-hint 3s ease-in-out infinite;
+  }
+  .lh-text {
+    font-size: 0.78rem;
+    color: #e8c870;
+    line-height: 1.4;
+    text-align: left;
+  }
+  .lh-text strong {
+    color: #c8a050;
+  }
+}
+
+@keyframes pulse-hint {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+@keyframes spin-hint {
+  0%   { transform: rotate(0deg); }
+  30%  { transform: rotate(90deg); }
+  60%  { transform: rotate(90deg); }
+  100% { transform: rotate(0deg); }
 }
 
 

@@ -129,31 +129,50 @@ function makeMapTexture() {
     ctx.strokeRect(p.x - 4, p.y - 4, 8, 8);
   });
 
-  // Dinding Utara
-  [{wx:-6,wz:-14,col:"#e87820",lbl:"Harmoni"},
-   {wx: 0,wz:-14,col:"#c040a0",lbl:"Kota"},
-   {wx: 6,wz:-14,col:"#40a050",lbl:"Hutan"}
-  ].forEach(({wx,wz,col,lbl}) => { const p=toMap(wx,wz); drawPainting(ctx,p.x,p.y+5,30,9,col,lbl); });
+  // Dinding Utara — Arduino, Cuaca, Detektif
+  [{wx:-5.5,wz:-14,col:"#00ff88",lbl:"Arduino",    proj:true},
+   {wx:   0,wz:-14,col:"#38bdf8",lbl:"Cuaca",      proj:true},
+   {wx: 5.5,wz:-14,col:"#f0d080",lbl:"Detektif",   proj:true}
+  ].forEach(({wx,wz,col,lbl,proj}) => { const p=toMap(wx,wz); drawPainting(ctx,p.x,p.y+5,28,9,col,lbl,proj); });
 
-  // Dinding Timur
-  [{wx:11,wz:-6,col:"#1060a0",lbl:"Lautan"},
-   {wx:11,wz: 2,col:"#e05010",lbl:"Api"}
-  ].forEach(({wx,wz,col,lbl}) => { const p=toMap(wx,wz); drawPainting(ctx,p.x-5,p.y,9,28,col,lbl); });
+  // Dinding Timur zona utara — Chat Ocean, Perpustakaan
+  [{wx:11,wz:-6,col:"#007bff",lbl:"Chat",   proj:true},
+   {wx:11,wz: 3,col:"#2d6abf",lbl:"Perpus", proj:true}
+  ].forEach(({wx,wz,col,lbl,proj}) => { const p=toMap(wx,wz); drawPainting(ctx,p.x-5,p.y,9,28,col,lbl,proj); });
 
-  // Dinding Barat
-  [{wx:-11,wz:-6,col:"#6040c0",lbl:"Batas"},
-   {wx:-11,wz: 2,col:"#00e5c8",lbl:"StatLab",proj:true}
+  // Dinding Barat — Life Dashboard, StatLab
+  [{wx:-11,wz:-6,col:"#a855f7",lbl:"LifeDash",proj:true},
+   {wx:-11,wz: 3,col:"#00e5c8",lbl:"StatLab", proj:true}
   ].forEach(({wx,wz,col,lbl,proj}) => { const p=toMap(wx,wz); drawPainting(ctx,p.x+5,p.y,9,28,col,lbl,proj); });
 
-  // Dinding Selatan
-  [{wx:-5,wz:14,col:"#007bff",lbl:"Chat",  proj:true},
-   {wx: 5,wz:14,col:"#2d6abf",lbl:"Perpus",proj:true}
-  ].forEach(({wx,wz,col,lbl,proj}) => { const p=toMap(wx,wz); drawPainting(ctx,p.x,p.y-5,28,9,col,lbl,proj); });
+  // Dinding Selatan — kosong
+  // (tidak ada bingkai)
 
-  // Patung
-  [{wx:-3.5,wz:-3,col:"#d4a020",lbl:"○"},
-   {wx: 3.5,wz:-3,col:"#2060c0",lbl:"●"},
-   {wx:   0,wz: 4,col:"#c02828",lbl:"△"}
+  // Galeri foto — dinding Timur zona selatan (G1-G5)
+  [{wx:11,wz:8 },{wx:11,wz:9.5},{wx:11,wz:11},
+   {wx:11,wz:8.8},{wx:11,wz:10.4}
+  ].forEach(({wx,wz},i) => {
+    const p=toMap(wx,wz);
+    const isTop = i < 3;
+    ctx.fillStyle = "rgba(150,130,80,0.6)";
+    ctx.fillRect(p.x - (isTop?3:3), p.y - (isTop?5:3), isTop?6:6, isTop?10:6);
+    ctx.strokeStyle = "rgba(200,160,80,0.5)"; ctx.lineWidth=0.8;
+    ctx.strokeRect(p.x - (isTop?3:3), p.y - (isTop?5:3), isTop?6:6, isTop?10:6);
+  });
+  // Label galeri
+  const gLabel = toMap(11, 9.5);
+  ctx.fillStyle="rgba(180,150,100,0.6)"; ctx.font="8px sans-serif"; ctx.textAlign="center";
+  ctx.fillText("Galeri", gLabel.x - 14, gLabel.y);
+
+  // Patung tengah — GitHub, LinkedIn, Music
+  [{wx:-3.5,wz:-4,  col:"#58a6ff",lbl:"GitHub"},
+   {wx: 3.5,wz:-4,  col:"#0ea5e9",lbl:"LinkedIn"},
+   {wx:   0,wz:-0.5,col:"#c8a050",lbl:"Music"}
+  ].forEach(({wx,wz,col,lbl}) => { const p=toMap(wx,wz); drawSculpture(ctx,p.x,p.y,col,lbl); });
+
+  // Patung selatan — Availability, Tech Stack
+  [{wx:-5,wz:11,col:"#22c55e",lbl:"Available"},
+   {wx: 5,wz:11,col:"#a78bfa",lbl:"TechStack"}
   ].forEach(({wx,wz,col,lbl}) => { const p=toMap(wx,wz); drawSculpture(ctx,p.x,p.y,col,lbl); });
 
   // Papan sambutan (ikon)
@@ -187,10 +206,10 @@ function makeMapTexture() {
   ctx.beginPath(); ctx.moveTo(PAD + 40, ly - 8); ctx.lineTo(TEX - PAD - 40, ly - 8); ctx.stroke();
 
   ctx.font = "12px sans-serif"; ctx.textAlign = "left";
-  ctx.fillStyle = "#5a4a28";  ctx.fillText("\u25a0 Lukisan Seni", MX + 4, ly + 2);
-  ctx.fillStyle = "#00e5c8";  ctx.fillText("\u25a0 Proyek / StatLab", MX + 4, ly + 18);
-  ctx.fillStyle = "rgba(180,150,100,0.5)"; ctx.fillText("\u25cf Patung", MX + 200, ly + 2);
-  ctx.fillStyle = "rgba(200,160,80,0.4)";  ctx.fillText("\u25a0 Pilar", MX + 200, ly + 18);
+  ctx.fillStyle = "#c8a050";                   ctx.fillText("\u25a0 Proyek Digital",  MX + 4,   ly + 2);
+  ctx.fillStyle = "rgba(180,150,100,0.5)";     ctx.fillText("\u25a0 Galeri Foto",     MX + 4,   ly + 18);
+  ctx.fillStyle = "rgba(180,150,100,0.5)";     ctx.fillText("\u25cf Patung Interaktif", MX + 200, ly + 2);
+  ctx.fillStyle = "rgba(200,160,80,0.4)";      ctx.fillText("\u25a0 Pilar",           MX + 200, ly + 18);
 
   // Vignette
   const vig = ctx.createRadialGradient(TEX/2, TEX_H/2, TEX_H*0.15, TEX/2, TEX_H/2, TEX_H*0.85);

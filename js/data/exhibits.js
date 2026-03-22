@@ -117,4 +117,16 @@ export const EXHIBITS = [
     icon:"\u266a", bg:"#0e0a04", accent:"#c8a050",
     videoId:"5uDY6hEYfPc",
     url:"https://youtu.be/5uDY6hEYfPc", isMusic:true },
+
+  { type:"sculpture", title:"Open to Work",
+    artist:"Xina", year:"2026",
+    desc:"Sedang mencari peluang baru — full-time, freelance, atau kolaborasi. Klik untuk kirim email.",
+    icon:"\u26a1", bg:"#0a1a0a", accent:"#22c55e",
+    url:"mailto:afriansyahs235@gmail.com", isAvailability:true },
+
+  { type:"sculpture", title:"Tech Stack",
+    artist:"Xina", year:"2026",
+    desc:"Python · JavaScript · TypeScript · Golang · HTML/CSS · React · Arduino · SQL · MongoDB",
+    icon:"{ }", bg:"#0f0a1e", accent:"#a78bfa",
+    isStack:true },
 ];

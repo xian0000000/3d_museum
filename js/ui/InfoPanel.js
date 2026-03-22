@@ -10,6 +10,8 @@
  */
 
 const EXHIBIT_STYLES = {
+  isAvailability:{ tag:"Open to Work",          borderColor:"#22c55e", textColor:"#4ade80", showLink:true  },
+  isStack:       { tag:"Tech Stack",             borderColor:"#a78bfa", textColor:"#c4b5fd", showLink:false },
   isCuaca:     { tag:"Cuaca Bekasi",           borderColor:"#38bdf8", textColor:"#7dd3fc", showLink:true  },
   isDetektif:  { tag:"Detektif Produktivitas", borderColor:"#e8b84b", textColor:"#f5d278", showLink:true  },
   isArduino:   { tag:"Arduino Project",        borderColor:"#00ff88", textColor:"#00cc66", showLink:true  },

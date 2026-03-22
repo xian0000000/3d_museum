@@ -58,27 +58,53 @@ export class DragControls {
   }
 
   _initTouch(canvas) {
+    // Touch ID khusus untuk kamera — terpisah dari joystick
+    this._camTouchId = null;
+
     canvas.addEventListener("touchstart", (e) => {
-      const t = e.touches[0];
-      // Abaikan sentuhan di area joystick (kiri bawah 160x160px)
-      const isJoystickArea = t.clientX < 160 && t.clientY > window.innerHeight - 160;
-      if (isJoystickArea) return;
-      if (e.touches.length === 1) {
-        this._dragging = true;
-        this._lx = t.clientX;
-        this._ly = t.clientY;
+      // Cari touch yang BUKAN di area joystick (kiri bawah 160x160px)
+      for (const t of e.changedTouches) {
+        const isJoystickArea = t.clientX < 160 && t.clientY > window.innerHeight - 160;
+        if (!isJoystickArea && this._camTouchId === null) {
+          this._camTouchId = t.identifier;
+          this._dragging   = true;
+          this._lx = t.clientX;
+          this._ly = t.clientY;
+          break;
+        }
       }
     }, { passive: true });
 
-    window.addEventListener("touchend", () => { this._dragging = false; });
+    window.addEventListener("touchend", (e) => {
+      for (const t of e.changedTouches) {
+        if (t.identifier === this._camTouchId) {
+          this._camTouchId = null;
+          this._dragging   = false;
+        }
+      }
+    });
+
+    window.addEventListener("touchcancel", (e) => {
+      for (const t of e.changedTouches) {
+        if (t.identifier === this._camTouchId) {
+          this._camTouchId = null;
+          this._dragging   = false;
+        }
+      }
+    });
 
     window.addEventListener("touchmove", (e) => {
-      if (!this._dragging || e.touches.length !== 1) return;
-      this._yaw   -= (e.touches[0].clientX - this._lx) * 0.003;
-      this._pitch -= (e.touches[0].clientY - this._ly) * 0.003;
-      this._pitch  = Math.max(-1.0, Math.min(1.0, this._pitch));
-      this._lx = e.touches[0].clientX;
-      this._ly = e.touches[0].clientY;
+      if (!this._dragging) return;
+      for (const t of e.changedTouches) {
+        if (t.identifier === this._camTouchId) {
+          this._yaw   -= (t.clientX - this._lx) * 0.003;
+          this._pitch -= (t.clientY - this._ly) * 0.003;
+          this._pitch  = Math.max(-1.0, Math.min(1.0, this._pitch));
+          this._lx = t.clientX;
+          this._ly = t.clientY;
+          break;
+        }
+      }
     }, { passive: true });
   }
 

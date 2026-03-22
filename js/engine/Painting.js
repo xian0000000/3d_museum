@@ -111,11 +111,6 @@ export function createPainting(scene, data, pos, rotY, w = 3.0, h = 2.2) {
   plaque.position.set(0, -(h / 2 + 0.20), 0.04);
   group.add(plaque);
 
-  // ── Picture light (lokal +z = ke dalam ruangan) ──────────
-  const light = new THREE.PointLight(0xfff4d0, 1.0, 5.0);
-  light.position.set(0, h * 0.3, 1.4);
-  group.add(light);
-
   scene.add(group);
 
   return {
