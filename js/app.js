@@ -72,11 +72,11 @@ const PAINTING_LAYOUT = [
   // ── Galeri Foto — dinding Timur, zona selatan ─────────────
   // 5 bingkai kecil: baris atas 3 buah, baris bawah 2 buah (rata tengah)
   // Posisi Z: 7.5 / 9.5 / 11.5 (atas) dan 8.5 / 10.5 (bawah)
-  { idx:  9, pos: [E_WALL_X, FRAME_Y_U,  7.5], rotY: -Math.PI/2, w: 1.4, h: 1.0 },
-  { idx: 10, pos: [E_WALL_X, FRAME_Y_U,  9.5], rotY: -Math.PI/2, w: 1.4, h: 1.0 },
-  { idx: 11, pos: [E_WALL_X, FRAME_Y_U, 11.5], rotY: -Math.PI/2, w: 1.4, h: 1.0 },
-  { idx: 12, pos: [E_WALL_X, FRAME_Y_L,  8.5], rotY: -Math.PI/2, w: 1.4, h: 1.0 },
-  { idx: 13, pos: [E_WALL_X, FRAME_Y_L, 10.5], rotY: -Math.PI/2, w: 1.4, h: 1.0 },
+  { idx:  7, pos: [E_WALL_X, FRAME_Y_U,  7.5], rotY: -Math.PI/2, w: 1.4, h: 1.0 },
+  { idx:  8, pos: [E_WALL_X, FRAME_Y_U,  9.5], rotY: -Math.PI/2, w: 1.4, h: 1.0 },
+  { idx:  9, pos: [E_WALL_X, FRAME_Y_U, 11.5], rotY: -Math.PI/2, w: 1.4, h: 1.0 },
+  { idx: 10, pos: [E_WALL_X, FRAME_Y_L,  8.5], rotY: -Math.PI/2, w: 1.4, h: 1.0 },
+  { idx: 11, pos: [E_WALL_X, FRAME_Y_L, 10.5], rotY: -Math.PI/2, w: 1.4, h: 1.0 },
 ];
 
 // ─────────────────────────────────────────────────────────────
