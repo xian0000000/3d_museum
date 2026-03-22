@@ -169,7 +169,7 @@ export function createSculpture(scene, data, pos) {
 
     ctx.fillStyle = "#22c55e88";
     ctx.font = "13px sans-serif";
-    ctx.fillText("Klik untuk kirim email", S / 2, S * 0.84);
+    ctx.fillText("dekati untuk kirim email", S / 2, S * 0.84);
 
     faceTex = new THREE.CanvasTexture(cv);
     faceTex.encoding = THREE.sRGBEncoding;
@@ -213,7 +213,7 @@ export function createSculpture(scene, data, pos) {
   lctx.fillText((data.icon || "") + "  " + (data.title || ""), 256, 64);
 
   // Teks hint kecil — sesuai tipe patung
-  const hintText = data.isStack ? "dekati untuk lihat detail" : "klik untuk interaksi";
+  const hintText = data.isStack ? "dekati untuk lihat detail" : "dekati untuk interaksi";
   lctx.fillStyle = "rgba(255,255,255,0.55)";
   lctx.font = "22px Arial,sans-serif";
   lctx.fillText(hintText, 256, 98);
